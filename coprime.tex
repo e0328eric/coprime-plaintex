@@ -1,0 +1,169 @@
+%%
+%%      coprime.tex
+%%      author: Sungbae Jeong
+%%      coprime library for LuaPlainTex
+%%
+%%      This file is generated from emacs tangle with coprime.org. DO NOT EDIT THIS MANUALLY!
+%%
+%%      version 0.1.0
+
+\def\ifundefined#1{\expandafter\ifx\csname#1\endcsname\relax}
+\ifundefined{luatexversion}
+    \errmessage{Use luatex to compile this}
+\fi
+
+\input ams-math
+\input kotexplain
+\input tikz
+\input miniltx
+\input graphicx.sty
+
+\font\tenamsb=msbm10 \font\sevenamsb=msbm7 \font\fiveamsb=msbm5
+\newfam\bbfam
+\textfont\bbfam=\tenamsb
+\scriptfont\bbfam=\sevenamsb
+\scriptscriptfont\bbfam=\fiveamsb
+
+\font\teneufm=eusm10 \font\seveneufm=eusm7 \font\fiveeufm=eusm5
+\newfam\eufmfam
+\textfont\eufmfam=\teneufm
+\scriptfont\eufmfam=\seveneufm
+\scriptscriptfont\eufmfam=\fiveeufm
+\def\eufm{\fam\eufmfam}
+
+\let\scr=\script
+
+\def\pdfcolorstack{\pdfextension colorstack}
+\def\pdfcolorstackinit{\pdffeedback colorstackinit}
+
+\mathchardef\colorcnt=\pdfcolorstackinit page {0 g 0 G}
+\def\colorpop{\pdfcolorstack\colorcnt pop}
+\def\colorpush#1{\pdfcolorstack\colorcnt push {#1 k #1 K}}
+\def\colorset#1{\pdfcolorstack\colorcnt set {#1 k #1 K}}
+\def\grayscalepush#1{\pdfcolorstack\colorcnt push {#1 g #1 G}}
+\def\grayscaleset#1{\pdfcolorstack\colorcnt set {#1 g #1 G}}
+
+\def\Red{\colorpush{0 1 1 0}\aftergroup\colorpop}
+\def\Blue{\colorpush{1 1 0 0}\aftergroup\colorpop}
+\def\Green{\colorpush{1 0 1 0}\aftergroup\colorpop}
+\def\Cyan{\colorpush{1 0 0 0}\aftergroup\colorpop}
+\def\Magenta{\colorpush{0 1 0 0}\aftergroup\colorpop}
+\def\Yellow{\colorpush{0 0 1 0}\aftergroup\colorpop}
+\def\Black{\grayscalepush{0}\aftergroup\colorpop}
+\def\White{\grayscalepush{1}\aftergroup\colorpop}
+\def\RedCustom#1{\colorpush{0 #1 #1 0}\aftergroup\colorpop}
+\def\BlueCustom#1{\colorpush{#1 #1 0 0}\aftergroup\colorpop}
+\def\GreenCustom#1{\colorpush{#1 0 #1 0}\aftergroup\colorpop}
+\def\CyanCustom#1{\colorpush{#1 0 0 0}\aftergroup\colorpop}
+\def\MagentaCustom#1{\colorpush{0 #1 0 0}\aftergroup\colorpop}
+\def\YellowCustom#1{\colorpush{0 0 #1 0}\aftergroup\colorpop}
+
+\def\bbb{\fam\bbfam}
+
+\def\Af{{\frak A}} \def\Bf{{\frak B}} \def\Cf{{\frak C}} \def\Df{{\frak D}}
+\def\Ef{{\frak E}} \def\Ff{{\frak F}} \def\Gf{{\frak G}} \def\Hf{{\frak H}}
+\def\If{{\frak I}} \def\Jf{{\frak J}} \def\Kf{{\frak K}} \def\Lf{{\frak L}}
+\def\Mf{{\frak M}} \def\Nf{{\frak N}} \def\Of{{\frak O}} \def\Pf{{\frak P}}
+\def\Qf{{\frak Q}} \def\Rf{{\frak R}} \def\Sf{{\frak S}} \def\Tf{{\frak T}}
+\def\Uf{{\frak U}} \def\Vf{{\frak V}} \def\Wf{{\frak W}} \def\Xf{{\frak X}}
+\def\Yf{{\frak Y}} \def\Zf{{\frak Z}}
+
+\def\Ac{{\cal A}} \def\Bc{{\cal B}} \def\Cc{{\cal C}} \def\Dc{{\cal D}}
+\def\Ec{{\cal E}} \def\Fc{{\cal F}} \def\Gc{{\cal G}} \def\Hc{{\cal H}}
+\def\Ic{{\cal I}} \def\Jc{{\cal J}} \def\Kc{{\cal K}} \def\Lc{{\cal L}}
+\def\Mc{{\cal M}} \def\Nc{{\cal N}} \def\Oc{{\cal O}} \def\Pc{{\cal P}}
+\def\Qc{{\cal Q}} \def\Rc{{\cal R}} \def\Sc{{\cal S}} \def\Tc{{\cal T}}
+\def\Uc{{\cal U}} \def\Vc{{\cal V}} \def\Wc{{\cal W}} \def\Xc{{\cal X}}
+\def\Yc{{\cal Y}} \def\Zc{{\cal Z}}
+
+\def\As{{\scr A}} \def\Bs{{\scr B}} \def\Cs{{\scr C}} \def\Ds{{\scr D}}
+\def\Es{{\scr E}} \def\Fs{{\scr F}} \def\Gs{{\scr G}} \def\Hs{{\scr H}}
+\def\Is{{\scr I}} \def\Js{{\scr J}} \def\Ks{{\scr K}} \def\Ls{{\scr L}}
+\def\Ms{{\scr M}} \def\Ns{{\scr N}} \def\Os{{\scr O}} \def\Ps{{\scr P}}
+\def\Qs{{\scr Q}} \def\Rs{{\scr R}} \def\Ss{{\scr S}} \def\Ts{{\scr T}}
+\def\Us{{\scr U}} \def\Vs{{\scr V}} \def\Ws{{\scr W}} \def\Xs{{\scr X}}
+\def\Ys{{\scr Y}} \def\Zs{{\scr Z}}
+
+\def\Ab{{\bbb A}} \def\Bb{{\bbb B}} \def\Cb{{\bbb C}} \def\Db{{\bbb D}}
+\def\Eb{{\bbb E}} \def\Fb{{\bbb F}} \def\Gb{{\bbb G}} \def\Hb{{\bbb H}}
+\def\Ib{{\bbb I}} \def\Jb{{\bbb J}} \def\Kb{{\bbb K}} \def\Lb{{\bbb L}}
+\def\Mb{{\bbb M}} \def\Nb{{\bbb N}} \def\Ob{{\bbb O}} \def\Pb{{\bbb P}}
+\def\Qb{{\bbb Q}} \def\Rb{{\bbb R}} \def\Sb{{\bbb S}} \def\Tb{{\bbb T}}
+\def\Ub{{\bbb U}} \def\Vb{{\bbb V}} \def\Wb{{\bbb W}} \def\Xb{{\bbb X}}
+\def\Yb{{\bbb Y}} \def\Zb{{\bbb Z}}
+
+\def\Ae{{\eufm A}} \def\Be{{\eufm B}} \def\Ce{{\eufm C}} \def\De{{\eufm D}}
+\def\Ee{{\eufm E}} \def\Fe{{\eufm F}} \def\Ge{{\eufm G}} \def\He{{\eufm H}}
+\def\Ie{{\eufm I}} \def\Je{{\eufm J}} \def\Ke{{\eufm K}} \def\Le{{\eufm L}}
+\def\Me{{\eufm M}} \def\Ne{{\eufm N}} \def\Oe{{\eufm O}} \def\Pe{{\eufm P}}
+\def\Qe{{\eufm Q}} \def\Re{{\eufm R}} \def\Se{{\eufm S}} \def\Te{{\eufm T}}
+\def\Ue{{\eufm U}} \def\Ve{{\eufm V}} \def\We{{\eufm W}} \def\Xe{{\eufm X}}
+\def\Ye{{\eufm Y}} \def\Ze{{\eufm Z}}
+
+\let\N=\Nb
+\let\Z=\Zb
+\let\Q=\Qb
+\let\R=\Rb
+\let\C=\Cb
+
+\def\defeq{\mathbin{:=}}
+\def\symdiff{\mathbin{\triangle}}
+\def\sing{\mathrel{\bot}}
+\def\uc{{\frak c}}
+
+\let\emptyset=\varnothing
+
+\def\Re{\mathop{\rm Re}}
+\def\Im{\mathop{\rm Im}}
+\def\sgn{\mathop{\rm sgn}}
+\def\diam{\mathop{\rm diam}}
+\def\supp{\mathop{\rm supp}}
+
+\def\limsup{\mathop{\overline{\lim}}}
+\def\liminf{\mathop{\vcenter{\hbox{$\underline{\lim}$}}}}
+\let\lims=\limsup
+\let\limi=\liminf
+
+\def\cupdot{\mathbin{\ooalign{\hfil$\cup$\hfil\cr\hfil$\cdot$\hfil\cr}}}
+
+\def\@bigcupdot#1#2#3#4{%
+    \setbox0=\hbox{$#1\bigcup$}
+    \setbox1=\hbox{\ooalign{\hfil$#1\bigcup$\hfil\cr\hfil\raise#3\hbox{$#2$}\hfil\cr}}
+    \vcenter{\box1\kern#4\hbox{}}
+}
+\def\bigcupdot{\mathop{\mathchoice
+    {\@bigcupdot{\displaystyle}{\scriptstyle\bullet}{1pt}{-8pt}}
+    {\@bigcupdot{\textstyle}{\scriptscriptstyle\bullet}{1pt}{-10pt}}
+    {\@bigcupdot{\scriptstyle}{\scriptscriptstyle\bullet}{0.7pt}{-12pt}}
+    {\@bigcupdot{\scriptscriptstyle}{\cdot}{-1pt}{-12pt}}
+}}
+
+\def\unif@rm#1#2#3{\mathrel{\raise#2\hbox{$#1\rightarrow$}\mkern#3\lower#2\hbox{$#1\rightarrow$}}}
+\def\uniform{%
+    \mathchoice{\unif@rm\displaystyle{2.5pt}{-18mu}}
+        {\unif@rm\textstyle{2.5pt}{-18mu}}
+        {\unif@rm\scriptstyle{1.8pt}{-18mu}}
+        {\unif@rm\scriptscriptstyle{1.2pt}{-17mu}}
+}
+\def\converges #1 to #2 with #3{%
+    \ifx\uniform#3{#1}\uniform{#2}%
+    \else{#1}\buildrel{#3}\over\to{#2}%
+    \fi
+}
+\let\converge=\converges
+
+\newread\aux
+\immediate\openin\aux=\jobname.aux
+\ifeof\aux \message{! No file \jobname.aux;}
+\else \input \jobname.aux \immediate\closein\aux \fi
+\newwrite\aux
+\immediate\openout\aux=\jobname.aux
+
+\def\strip#1>{}
+\def\label#1{\immediate\write\aux%
+{\string\expandafter\string\def\string\csname\space#1\string\endcsname%
+{{\expandafter\strip\meaning\lblitem}}}}
+
+\def\ref#1{%
+    \ifundefined{#1}\message{! No ref. to #1;}%
+    \else\csname #1\endcsname\fi}
