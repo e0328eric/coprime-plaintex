@@ -44,6 +44,9 @@ end
 }
 \def\definefont#1#2#3#4{\directlua{__DefineFont__("#1",#2,"#3","#4")}}
 
+\definefont{titlefnt}{16}{cmbx10}{UnBatangBold}
+\definefont{authorfnt}{11}{cmr10}{UnBatang}
+\definefont{datefnt}{11}{cmr10}{UnBatang}
 \definefont{sectionfnt}{14}{cmbx10}{UnBatangBold}
 \definefont{subsectionfnt}{11.5}{cmbx10}{UnBatangBold}
 
@@ -59,6 +62,25 @@ end
 
 \def\pdfcolorstack{\pdfextension colorstack}
 \def\pdfcolorstackinit{\pdffeedback colorstackinit}
+
+\def\today{\ifcase\month\or
+  January\or February\or March\or April\or May\or June\or
+  July\or August\or September\or October\or November\or December\fi
+  \space\number\day, \number\year}
+\def\title#1#2#3{\directlua{
+    tex.print([[\string\centerline{\string\titlefnt\space #1}]])
+    tex.print([[\string\kern 0.8em]])
+    tex.print([[\string\centerline{\string\datefnt\space #2}]])
+    tex.print([[\string\kern 0.8em]])
+
+    if "#3" == "" then
+    tex.print([[\string\centerline{\string\datefnt\space\string\today}]])
+    else
+    tex.print([[\string\centerline{\string\datefnt\space #3}]])
+    end
+
+    tex.print([[\string\kern 3em]])
+}}
 
 \directlua{
 sectionCnt = 0

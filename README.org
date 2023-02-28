@@ -12,6 +12,8 @@
   - [[#import-libraries][Import Libraries]]
   - [[#define-fonts][Define Fonts]]
   - [[#remap-pdftex-primitives][Remap PdfTeX primitives]]
+- [[#title][Title]]
+  - [[#title-command][Title Command]]
 - [[#sections][Sections]]
   - [[#define-registers][Define registers]]
   - [[#section-function][Section Function]]
@@ -99,6 +101,9 @@ end
 
 Using the upper command, we can make =\definefont= command. For example, =\large= command can be defined by =\definefont{large}{12}{cmr10}{UnBatang}=.
 #+BEGIN_SRC tex
+\definefont{titlefnt}{16}{cmbx10}{UnBatangBold}
+\definefont{authorfnt}{11}{cmr10}{UnBatang}
+\definefont{datefnt}{11}{cmr10}{UnBatang}
 \definefont{sectionfnt}{14}{cmbx10}{UnBatangBold}
 \definefont{subsectionfnt}{11.5}{cmbx10}{UnBatangBold}
 
@@ -120,6 +125,28 @@ LuaTeX uses three primitives =\pdfextension=, =\pdfvariable= and =\pdffeedback= 
 \def\pdfcolorstackinit{\pdffeedback colorstackinit}
 #+END_SRC
 
+* Title
+** Title Command
+#+BEGIN_SRC tex
+\def\today{\ifcase\month\or
+  January\or February\or March\or April\or May\or June\or
+  July\or August\or September\or October\or November\or December\fi
+  \space\number\day, \number\year}
+\def\title#1#2#3{\directlua{
+    tex.print([[\string\centerline{\string\titlefnt\space #1}]])
+    tex.print([[\string\kern 0.8em]])
+    tex.print([[\string\centerline{\string\datefnt\space #2}]])
+    tex.print([[\string\kern 0.8em]])
+
+    if "#3" == "" then
+    tex.print([[\string\centerline{\string\datefnt\space\string\today}]])
+    else
+    tex.print([[\string\centerline{\string\datefnt\space #3}]])
+    end
+
+    tex.print([[\string\kern 3em]])
+}}
+#+END_SRC
 * Sections
 ** Define registers
 To make section function, we need to define some registers. Since we are using LuaTex, we do not making registers using tex primitives.
