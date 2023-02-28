@@ -12,12 +12,16 @@
   - [[#import-libraries][Import Libraries]]
   - [[#define-fonts][Define Fonts]]
   - [[#remap-pdftex-primitives][Remap PdfTeX primitives]]
-  - [[#colors][Colors]]
+- [[#sections][Sections]]
+  - [[#define-registers][Define registers]]
+- [[#colors][Colors]]
 - [[#math-commands][Math Commands]]
   - [[#convinent-command-to-use-blackboard-font][Convinent command to use blackboard font]]
   - [[#special-math-alphabets][Special Math Alphabets]]
   - [[#number-system][Number System]]
   - [[#basic-mathematical-functions][Basic Mathematical Functions]]
+  - [[#proved-box][Proved Box]]
+  - [[#theorems][Theorems]]
 - [[#labeling-and-referencing][Labeling and Referencing]]
   - [[#labeling][Labeling]]
   - [[#referencing][Referencing]]
@@ -84,7 +88,17 @@ LuaTeX uses three primitives =\pdfextension=, =\pdfvariable= and =\pdffeedback= 
 #+END_SRC
 However,
 
-** Colors
+* Sections
+** Define registers
+To make section function, we need to define some registers
+#+BEGIN_SRC tex
+\newcount\sectioncnt
+\ifundefined{UseChapter}
+    \global\let\chaptercnt=\sectioncnt
+\fi
+#+END_SRC
+
+* Colors
 These commands makes colors. Using these, basic colors are implemented.
 #+BEGIN_SRC tex
 \mathchardef\colorcnt=\pdfcolorstackinit page {0 g 0 G}
@@ -112,10 +126,6 @@ Default colors are following:
 \def\MagentaCustom#1{\colorpush{0 #1 0 0}\aftergroup\colorpop}
 \def\YellowCustom#1{\colorpush{0 0 #1 0}\aftergroup\colorpop}
 #+END_SRC
-
-
-
-
 
 * Math Commands
 ** Convinent command to use blackboard font
@@ -238,6 +248,71 @@ Now, following code is for easy usage of converging notations.
 \let\converge=\converges
 #+END_SRC
 
+** Proved Box
+I use the white blank box to denote that the proof is finished. These commands are for that.
+#+BEGIN_SRC tex
+\def\provedboxinit{\vbox{%
+    \hrule\hbox{\vrule\kern 3pt\vbox{\kern 3pt\hbox{}\kern 3pt}%
+    \kern 3pt\vrule}\hrule
+}}
+
+\def\lemmaprovedboxinit{\vrule height1.5ex width1.1ex}
+
+\def\provedbox{%
+    {\unskip\nobreak\hfil\penalty50
+    \hfil\phantom{\provedboxinit}\nobreak\hfil\provedboxinit
+    \parfillskip=0pt \finalhyphendemerits=0 \par}%
+}
+
+\def\proved{\ifmmode\eqno\hbox{\provedboxinit}\else\provedbox\fi}
+
+\def\lemmaproved{%
+    \ifmmode\eqno\hbox{\lemmaprovedboxinit}
+    \else\hfill\lemmaprovedboxinit
+    \fi
+}
+#+END_SRC
+** Theorems
+Using lua script, we can make *a template* for each theorems.
+#+BEGIN_SRC tex
+\directlua{
+function MakeTheorem(name)
+    local count = [[\string\newcount\string\]] .. name .. "cnt"
+    local start_def = [[\string\def\string\]] .. name .. [[{
+    \string\par\string\penalty-50\string\advance\string\]] .. name .. [[cnt by 1
+    \string\begingroup
+    \string\postdisplaypenalty=10000
+    \string\vskip 1.5ex
+    \string\hrule\space height 0.7pt\string\nobreak
+    \string\vskip 1.5ex
+    \string\noindent{\string\bf\space]] .. name .. [[\space\string\the\string\chaptercnt.\string\the\string\]] .. name .. [[cnt}\string\kern 1em
+    \string\def\string\proof{%
+        \string\par\string\hbox\space to\string\hsize{\string\xleaders\string\hbox\space to.8em{\string\hss-\string\hss}\string\hfill}
+        \string\noindent{\string\it\space proof.}
+    }
+    \string\edef\string\lblitem{{\string\bf\space]] .. name .. [[\space\string\the\string\chaptercnt.\string\the\string\]] .. name .. [[cnt}}\string\relax
+}]]
+
+    local end_def = [[\string\def\string\end]] .. name .. [[{%
+    \string\par\string\penalty10000
+    \string\vskip1.5ex
+    \string\hrule\space height 0.7pt
+    \string\endgroup\string\par
+    \string\vskip 1.5ex
+}]]
+    tex.print(count)
+    tex.print(start_def)
+    tex.print(end_def)
+end
+
+MakeTheorem("Theorem")
+MakeTheorem("Proposition")
+MakeTheorem("Corollary")
+MakeTheorem("Lemma")
+}
+#+END_SRC
+
+#+RESULTS:
 
 * Labeling and Referencing
 ** Labeling

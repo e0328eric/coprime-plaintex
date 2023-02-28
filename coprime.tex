@@ -36,6 +36,11 @@
 \def\pdfcolorstack{\pdfextension colorstack}
 \def\pdfcolorstackinit{\pdffeedback colorstackinit}
 
+\newcount\sectioncnt
+\ifundefined{UseChapter}
+    \global\let\chaptercnt=\sectioncnt
+\fi
+
 \mathchardef\colorcnt=\pdfcolorstackinit page {0 g 0 G}
 \def\colorpop{\pdfcolorstack\colorcnt pop}
 \def\colorpush#1{\pdfcolorstack\colorcnt push {#1 k #1 K}}
@@ -151,6 +156,63 @@
     \fi
 }
 \let\converge=\converges
+
+\def\provedboxinit{\vbox{%
+    \hrule\hbox{\vrule\kern 3pt\vbox{\kern 3pt\hbox{}\kern 3pt}%
+    \kern 3pt\vrule}\hrule
+}}
+
+\def\lemmaprovedboxinit{\vrule height1.5ex width1.1ex}
+
+\def\provedbox{%
+    {\unskip\nobreak\hfil\penalty50
+    \hfil\phantom{\provedboxinit}\nobreak\hfil\provedboxinit
+    \parfillskip=0pt \finalhyphendemerits=0 \par}%
+}
+
+\def\proved{\ifmmode\eqno\hbox{\provedboxinit}\else\provedbox\fi}
+
+\def\lemmaproved{%
+    \ifmmode\eqno\hbox{\lemmaprovedboxinit}
+    \else\hfill\lemmaprovedboxinit
+    \fi
+}
+
+\directlua{
+function MakeTheorem(name)
+    local count = [[\string\newcount\string\]] .. name .. "cnt"
+    local start_def = [[\string\def\string\]] .. name .. [[{
+    \string\par\string\penalty-50\string\advance\string\]] .. name .. [[cnt by 1
+    \string\begingroup
+    \string\postdisplaypenalty=10000
+    \string\vskip 1.5ex
+    \string\hrule\space height 0.7pt\string\nobreak
+    \string\vskip 1.5ex
+    \string\noindent{\string\bf\space]] .. name .. [[\space\string\the\string\chaptercnt.\string\the\string\]] .. name .. [[cnt}\string\kern 1em
+    \string\def\string\proof{%
+        \string\par\string\hbox\space to\string\hsize{\string\xleaders\string\hbox\space to.8em{\string\hss-\string\hss}\string\hfill}
+        \string\noindent{\string\it\space proof.}
+    }
+    \string\edef\string\lblitem{{\string\bf\space]] .. name .. [[\space\string\the\string\chaptercnt.\string\the\string\]] .. name .. [[cnt}}\string\relax
+}]]
+
+    local end_def = [[\string\def\string\end]] .. name .. [[{%
+    \string\par\string\penalty10000
+    \string\vskip1.5ex
+    \string\hrule\space height 0.7pt
+    \string\endgroup\string\par
+    \string\vskip 1.5ex
+}]]
+    tex.print(count)
+    tex.print(start_def)
+    tex.print(end_def)
+end
+
+MakeTheorem("Theorem")
+MakeTheorem("Proposition")
+MakeTheorem("Corollary")
+MakeTheorem("Lemma")
+}
 
 \newread\aux
 \immediate\openin\aux=\jobname.aux
