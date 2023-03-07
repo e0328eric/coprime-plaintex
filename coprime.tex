@@ -242,8 +242,9 @@ subsectionCnt = 0
 
 \directlua{
 function __MakeTheorem__(name)
+    local string = require("string")
     local count = [[\string\newcount\string\]] .. name .. "cnt"
-    local start_def = [[\string\def\string\]] .. name .. [[{
+    local start_def = [[\string\def\string\]] .. string.lower(name) .. [[{
     \string\par\string\penalty-50\string\advance\string\]] .. name .. [[cnt by 1
     \string\begingroup
     \string\postdisplaypenalty=10000
@@ -258,7 +259,37 @@ function __MakeTheorem__(name)
     \string\edef\string\lblitem{{\string\bf\space]] .. name .. [[\space]] .. sectionCnt .. [[.\string\the\string\]] .. name .. [[cnt}}\string\relax
 }]]
 
-    local end_def = [[\string\def\string\end]] .. name .. [[{%
+    local end_def = [[\string\def\string\end]] .. string.lower(name) .. [[{%
+    \string\par\string\penalty10000
+    \string\vskip1.5ex
+    \string\hrule\space height 0.7pt
+    \string\endgroup\string\par
+    \string\vskip 1.5ex
+}]]
+    tex.print(count)
+    tex.print(start_def)
+    tex.print(end_def)
+end
+
+function __MakeTheoremWithName__(name)
+    local string = require("string")
+    local count = [[\string\newcount\string\]] .. name .. "cnt"
+    local start_def = [[\string\def\string\name]] .. string.lower(name) .. [[\string#1{
+    \string\par\string\penalty-50\string\advance\string\]] .. name .. [[cnt by 1
+    \string\begingroup
+    \string\postdisplaypenalty=10000
+    \string\vskip 1.5ex
+    \string\hrule\space height 0.7pt\string\nobreak
+    \string\vskip 1.5ex
+    \string\noindent{\string\bf\space]] .. name .. [[\space]] .. sectionCnt .. [[.\string\the\string\]] .. name .. [[cnt}\space(\string#1)\string\kern 1em
+    \string\def\string\proof{%
+        \string\par\string\hbox\space to\string\hsize{\string\xleaders\string\hbox\space to.8em{\string\hss-\string\hss}\string\hfill}
+        \string\noindent{\string\it\space proof.}
+    }
+    \string\edef\string\lblitem{{\string\bf\space]] .. name .. [[\space]] .. sectionCnt .. [[.\string\the\string\]] .. name .. [[cnt}}\string\relax
+}]]
+
+    local end_def = [[\string\def\string\end]] .. string.lower(name) .. [[{%
     \string\par\string\penalty10000
     \string\vskip1.5ex
     \string\hrule\space height 0.7pt
@@ -271,20 +302,33 @@ function __MakeTheorem__(name)
 end
 }
 \def\maketheorem#1{\directlua{__MakeTheorem__("#1")}}
+\def\maketheoremwithname#1{\directlua{__MakeTheoremWithName__("#1")}}
 
+\maketheorem{Definition}
 \maketheorem{Theorem}
 \maketheorem{Proposition}
 \maketheorem{Corollary}
 \maketheorem{Lemma}
 
-\let\thm=\Theorem
-\let\endthm=\endTheorem
-\let\prop=\Proposition
-\let\endprop=\endProposition
-\let\coro=\Corollary
-\let\endcoro=\endCorollary
-\let\lemma=\Lemma
-\let\endlemma=\endLemma
+\maketheoremwithname{Definition}
+\maketheoremwithname{Theorem}
+\maketheoremwithname{Proposition}
+\maketheoremwithname{Corollary}
+\maketheoremwithname{Lemma}
+
+\let\defin=\definition
+\let\enddefin=\enddefinition
+\let\thm=\theorem
+\let\endthm=\endtheorem
+\let\prop=\proposition
+\let\endprop=\endproposition
+\let\coro=\corollary
+\let\endcoro=\endcorollary
+
+\let\namedefin=\namedefinition
+\let\namethm=\nametheorem
+\let\nameprop=\nameproposition
+\let\namecoro=\namecorollary
 
 \newread\aux
 \immediate\openin\aux=\jobname.aux

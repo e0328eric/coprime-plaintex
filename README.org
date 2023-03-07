@@ -393,6 +393,7 @@ end
 
 This package gives four theorems: `Theorem`, `Proposition`, `Corollary` and `Lemma`.
 #+BEGIN_SRC tex
+\maketheorem{Definition}
 \maketheorem{Theorem}
 \maketheorem{Proposition}
 \maketheorem{Corollary}
@@ -401,6 +402,8 @@ This package gives four theorems: `Theorem`, `Proposition`, `Corollary` and `Lem
 
 However, since each name contains a capital letter and commands are quite long, the package supports some abbreviations.
 #+BEGIN_SRC tex
+\let\defin=\Definition
+\let\enddefin=\endDefinition
 \let\thm=\Theorem
 \let\endthm=\endTheorem
 \let\prop=\Proposition
