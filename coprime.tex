@@ -82,24 +82,20 @@ end
     tex.print([[\string\kern 3em]])
 }}
 
-\directlua{
-sectionCnt = 0
-subsectionCnt = 0
-}
+\newcount\sectioncnt
+\newcount\subsectioncnt
 
 \def\section#1{
     \vskip 1em
-    \directlua{
-        subsectionCnt = 0
-        sectionCnt = sectionCnt + 1
-    }
-    \noindent{\sectionfnt\directlua{tex.sprint(sectionCnt .. ".\space#1")}}\par
+    \subsectioncnt=0
+    \advance\sectioncnt by 1
+    \noindent{\sectionfnt\the\sectioncnt.\space#1}\par
     \vskip 1em
 }
 
 \def\subsection#1{
-    \directlua{subsectionCnt = subsectionCnt + 1}
-    \noindent{\subsectionfnt\directlua{tex.sprint(sectionCnt .. "." .. subsectionCnt .. ".\space#1")}}\par
+    \advance\subsectioncnt by 1
+    \noindent{\subsectionfnt\the\sectioncnt.\the\subsectioncnt.\space#1}\par
     \vskip 1ex
 }
 
@@ -251,12 +247,12 @@ function __MakeTheorem__(name)
     \string\vskip 1.5ex
     \string\hrule\space height 0.7pt\string\nobreak
     \string\vskip 1.5ex
-    \string\noindent{\string\bf\space]] .. name .. [[\space]] .. sectionCnt .. [[.\string\the\string\]] .. name .. [[cnt}\string\kern 1em
+    \string\noindent{\string\bf\space]] .. name .. [[\space\string\the\string\sectioncnt.\string\the\string\]] .. name .. [[cnt}\string\kern 1em
     \string\def\string\proof{%
         \string\par\string\hbox\space to\string\hsize{\string\xleaders\string\hbox\space to.8em{\string\hss-\string\hss}\string\hfill}
         \string\noindent{\string\it\space proof.}
     }
-    \string\edef\string\lblitem{{\string\bf\space]] .. name .. [[\space]] .. sectionCnt .. [[.\string\the\string\]] .. name .. [[cnt}}\string\relax
+    \string\edef\string\lblitem{{\string\bf\space]] .. name .. [[\space\string\the\string\sectioncnt.\string\the\string\]] .. name .. [[cnt}}\string\relax
 }]]
 
     local end_def = [[\string\def\string\end]] .. string.lower(name) .. [[{%
@@ -281,12 +277,12 @@ function __MakeTheoremWithName__(name)
     \string\vskip 1.5ex
     \string\hrule\space height 0.7pt\string\nobreak
     \string\vskip 1.5ex
-    \string\noindent{\string\bf\space]] .. name .. [[\space]] .. sectionCnt .. [[.\string\the\string\]] .. name .. [[cnt}\space(\string#1)\string\kern 1em
+    \string\noindent{\string\bf\space]] .. name .. [[\space\string\the\string\sectioncnt.\string\the\string\]] .. name .. [[cnt}\space(\string#1)\string\kern 1em
     \string\def\string\proof{%
         \string\par\string\hbox\space to\string\hsize{\string\xleaders\string\hbox\space to.8em{\string\hss-\string\hss}\string\hfill}
         \string\noindent{\string\it\space proof.}
     }
-    \string\edef\string\lblitem{{\string\bf\space]] .. name .. [[\space]] .. sectionCnt .. [[.\string\the\string\]] .. name .. [[cnt}}\string\relax
+    \string\edef\string\lblitem{{\string\bf\space]] .. name .. [[\space\string\the\string\sectioncnt.\string\the\string\]] .. name .. [[cnt}}\string\relax
 }]]
 
     local end_def = [[\string\def\string\end]] .. string.lower(name) .. [[{%
