@@ -247,12 +247,15 @@ function __MakeTheorem__(name)
     \string\vskip 1.5ex
     \string\hrule\space height 0.7pt\string\nobreak
     \string\vskip 1.5ex
-    \string\noindent{\string\bf\space]] .. name .. [[\space\string\the\string\sectioncnt.\string\the\string\]] .. name .. [[cnt}\string\kern 1em
+    \string\noindent{\string\bf\space]] .. name ..
+    [[\space\string\the\string\sectioncnt.\string\the\string\]] .. name .. [[cnt}\string\kern 1em
     \string\def\string\proof{%
-        \string\par\string\hbox\space to\string\hsize{\string\xleaders\string\hbox\space to.8em{\string\hss-\string\hss}\string\hfill}
+        \string\par\string\hbox\space to\string\hsize{\string\xleaders\string\hbox\space
+        to.8em{\string\hss-\string\hss}\string\hfill}
         \string\noindent{\string\it\space proof.}
     }
-    \string\edef\string\lblitem{{\string\bf\space]] .. name .. [[\space\string\the\string\sectioncnt.\string\the\string\]] .. name .. [[cnt}}\string\relax
+    \string\edef\string\lblitem{{\string\bf\space]] .. name ..
+    [[\space\string\the\string\sectioncnt.\string\the\string\]] .. name .. [[cnt}}\string\relax
 }]]
 
     local end_def = [[\string\def\string\end]] .. string.lower(name) .. [[{%
@@ -277,12 +280,16 @@ function __MakeTheoremWithName__(name)
     \string\vskip 1.5ex
     \string\hrule\space height 0.7pt\string\nobreak
     \string\vskip 1.5ex
-    \string\noindent{\string\bf\space]] .. name .. [[\space\string\the\string\sectioncnt.\string\the\string\]] .. name .. [[cnt}\space(\string#1)\string\kern 1em
+    \string\noindent{\string\bf\space]] .. name ..
+    [[\space\string\the\string\sectioncnt.\string\the\string\]] .. name ..
+    [[cnt}\space(\string#1)\string\kern 1em
     \string\def\string\proof{%
-        \string\par\string\hbox\space to\string\hsize{\string\xleaders\string\hbox\space to.8em{\string\hss-\string\hss}\string\hfill}
+        \string\par\string\hbox\space to\string\hsize{\string\xleaders\string\hbox\space
+        to.8em{\string\hss-\string\hss}\string\hfill}
         \string\noindent{\string\it\space proof.}
     }
-    \string\edef\string\lblitem{{\string\bf\space]] .. name .. [[\space\string\the\string\sectioncnt.\string\the\string\]] .. name .. [[cnt}}\string\relax
+    \string\edef\string\lblitem{{\string\bf\space]] .. name ..
+    [[\space\string\the\string\sectioncnt.\string\the\string\]] .. name .. [[cnt}}\string\relax
 }]]
 
     local end_def = [[\string\def\string\end]] .. string.lower(name) .. [[{%
