@@ -84,16 +84,22 @@ end
 
 \newcount\sectioncnt
 \newcount\subsectioncnt
+\newif\ifsecti@nused
 
 \def\section#1{
-    \vskip 1em
+    \vskip 1pc
     \subsectioncnt=0
     \advance\sectioncnt by 1
     \noindent{\sectionfnt\the\sectioncnt.\space#1}\par
     \vskip 1em
+    \secti@nusedtrue
 }
 
 \def\subsection#1{
+    \ifsecti@nused\else
+    \vskip 1em
+    \fi
+    \secti@nusedfalse
     \advance\subsectioncnt by 1
     \noindent{\subsectionfnt\the\sectioncnt.\the\subsectioncnt.\space#1}\par
     \vskip 1ex
