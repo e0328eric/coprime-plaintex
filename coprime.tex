@@ -82,8 +82,7 @@ end
     tex.print([[\string\kern 3em]])
 }}
 
-\newcount\sectioncnt
-\newcount\subsectioncnt
+\newcount\eqnocnt \newcount\sectioncnt \newcount\subsectioncnt
 \newif\ifsecti@nused
 
 \def\section#1{
@@ -241,6 +240,10 @@ end
     \else\hfill\lemmaprovedboxinit
     \fi
 }
+
+\def\eqnolbl{\advance\eqnocnt by 1
+\begingroup\edef\lblitem{(\the\eqnocnt)}\endgroup\eqno{(\the\eqnocnt)}}
+
 
 \directlua{
 function __MakeTheorem__(name)
