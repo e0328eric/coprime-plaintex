@@ -241,8 +241,8 @@ end
     \fi
 }
 
-\def\Eqno{\advance\eqnocnt by 1 \eqno{(\the\eqnocnt)}}
-\def\Eqnolbl#1{\advance\eqnocnt by 1
+\def\Eqno{\global\advance\eqnocnt by 1 \eqno{(\the\eqnocnt)}}
+\def\Eqnolbl#1{\global\advance\eqnocnt by 1
 \begingroup\edef\lblitem{(\the\eqnocnt)}\label{#1}\endgroup\eqno{(\the\eqnocnt)}}
 
 \directlua{
