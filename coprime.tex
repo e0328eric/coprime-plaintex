@@ -5,7 +5,7 @@
 %%
 %%      This file is generated from emacs tangle with coprime.org. DO NOT EDIT THIS MANUALLY!
 %%
-%%      version 0.1.0
+%%      version 0.2.0
 
 \def\ifundefined#1{\expandafter\ifx\csname#1\endcsname\relax}
 \ifundefined{luatexversion}
@@ -241,9 +241,9 @@ end
     \fi
 }
 
-\def\eqnolbl{\advance\eqnocnt by 1
-\begingroup\edef\lblitem{(\the\eqnocnt)}\endgroup\eqno{(\the\eqnocnt)}}
-
+\def\Eqno{\advance\eqnocnt by 1 \eqno{(\the\eqnocnt)}}
+\def\Eqnolbl#1{\advance\eqnocnt by 1
+\begingroup\edef\lblitem{(\the\eqnocnt)}\label{#1}\endgroup\eqno{(\the\eqnocnt)}}
 
 \directlua{
 function __MakeTheorem__(name)
