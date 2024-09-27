@@ -80,6 +80,9 @@ end
     tex.print([[\string\kern 3em]])
 }}
 
+\edef\pdfhorigin{\pdfvariable horigin}
+\edef\pdfvorigin{\pdfvariable vorigin}
+
 \newcount\eqnocnt \newcount\sectioncnt \newcount\subsectioncnt
 \newif\ifsecti@nused
 
@@ -336,6 +339,14 @@ end
     \edef\lblitem{{\bf#1.}}\relax
 }
 \def\endthmbox{\par\penalty10000 \vskip 1.5ex \hrule height0.7pt \endgroup\par \vskip 1.5ex }
+
+\def\pf{%
+    \par\hbox to\hsize{\xleaders\hbox to.8em{\hss-\hss}\hfill}
+    \noindent{\it proof.}
+}
+\def\endpf{%
+    \par\penalty10000\hbox to\hsize{\xleaders\hbox to.8em{\hss-\hss}\hfill}\vskip 1.5ex
+}
 
 \def\maketheorem#1{\directlua{__MakeTheorem__("#1")}}
 \def\maketheoremwithname#1{\directlua{__MakeTheoremWithName__("#1")}}
