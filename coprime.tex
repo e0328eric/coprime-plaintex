@@ -3,8 +3,6 @@
 %%      author: Sungbae Jeong
 %%      coprime library for LuaPlainTex
 %%
-%%      This file is generated from emacs tangle with coprime.org. DO NOT EDIT THIS MANUALLY!
-%%
 %%      version 0.2.0
 
 \def\ifundefined#1{\expandafter\ifx\csname#1\endcsname\relax}
@@ -174,6 +172,8 @@ end
 \let\R=\Rb
 \let\C=\Cb
 
+\let\diff=\partial
+
 \def\defeq{\mathbin{:=}}
 \def\symdiff{\mathbin{\triangle}}
 \def\sing{\mathrel{\bot}}
@@ -313,6 +313,30 @@ function __MakeTheoremWithName__(name)
     tex.print(end_def)
 end
 }
+
+\def\thmbox#1{%
+    \par\penalty-50 \begingroup \postdisplaypenalty=10000 \vskip 1.5ex
+    \hrule height0.7pt\nobreak \vskip 1.5ex
+    \noindent{\bf#1.}\kern-5pt
+    \def\proof{%
+        \par\hbox to\hsize{\xleaders\hbox to.8em{\hss-\hss}\hfill}
+        \noindent{\it proof.}
+    }
+    \edef\lblitem{{\bf#1.}}\relax
+}
+
+\def\thmboxN#1#2{%
+    \par\penalty-50 \begingroup \postdisplaypenalty=10000 \vskip 1.5ex
+    \hrule height0.7pt\nobreak \vskip 1.5ex
+    \noindent{\bf#1 (#2).}\kern-5pt
+    \def\proof{%
+        \par\hbox to\hsize{\xleaders\hbox to.8em{\hss-\hss}\hfill}
+        \noindent{\it proof.}
+    }
+    \edef\lblitem{{\bf#1.}}\relax
+}
+\def\endthmbox{\par\penalty10000 \vskip 1.5ex \hrule height0.7pt \endgroup\par \vskip 1.5ex }
+
 \def\maketheorem#1{\directlua{__MakeTheorem__("#1")}}
 \def\maketheoremwithname#1{\directlua{__MakeTheoremWithName__("#1")}}
 
