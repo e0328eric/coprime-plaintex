@@ -13,8 +13,8 @@
 \input ams-math
 \input kotexplain
 \input tikz
-\input miniltx
-\input graphicx.sty
+
+\catcode`@=11
 
 \font\tenamsb=msbm10 \font\sevenamsb=msbm7 \font\fiveamsb=msbm5
 \newfam\bbfam
@@ -104,6 +104,16 @@ end
     \noindent{\subsectionfnt\the\sectioncnt.\the\subsectioncnt.\space#1}\par
     \vskip 1ex
 }
+
+% simple implementation for resizing elements
+\protected\def\pdfsetmatrix{\pdfextension setmatrix}
+\protected\def\pdfsave{\pdfextension save\relax}
+\protected\def\pdfrestore{\pdfextension restore\relax}
+
+% NOTE: #1 must be an integer
+\def\resizebox#1#2{\setbox0=\hbox{#2}%
+\setbox1=\hbox{\pdfsave\pdfsetmatrix{#1 0 0 #1}\rlap{#2}\pdfrestore}%
+\ht1=#1\ht0 \wd1=#1\wd0 \box1\hbox to0pt{}}
 
 \mathchardef\colorcnt=\pdfcolorstackinit page {0 g 0 G}
 \def\colorpop{\pdfcolorstack\colorcnt pop}
@@ -325,7 +335,7 @@ end
         \par\hbox to\hsize{\xleaders\hbox to.8em{\hss-\hss}\hfill}
         \noindent{\it proof.}
     }
-    \edef\lblitem{{\bf#1.}}\relax
+    \edef\lblitem{{\bf#1}}\relax
 }
 
 \def\thmboxN#1#2{%
@@ -336,7 +346,7 @@ end
         \par\hbox to\hsize{\xleaders\hbox to.8em{\hss-\hss}\hfill}
         \noindent{\it proof.}
     }
-    \edef\lblitem{{\bf#1.}}\relax
+    \edef\lblitem{{\bf#1}}\relax
 }
 \def\endthmbox{\par\penalty10000 \vskip 1.5ex \hrule height0.7pt \endgroup\par \vskip 1.5ex }
 
@@ -392,3 +402,5 @@ end
 \def\ref#1{%
     \ifundefined{#1}\message{! No ref. to #1;}%
     \else\csname #1\endcsname\fi}
+
+\catcode`@=12 % END OF coprime.tex
