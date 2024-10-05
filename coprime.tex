@@ -4,6 +4,7 @@
 %%      coprime library for LuaPlainTex
 %%
 %%      version 0.2.0
+%%
 
 \def\ifundefined#1{\expandafter\ifx\csname#1\endcsname\relax}
 \ifundefined{luatexversion}
@@ -83,7 +84,7 @@ end
 \edef\pdfhorigin{\pdfvariable horigin}
 \edef\pdfvorigin{\pdfvariable vorigin}
 
-\newcount\eqnocnt \newcount\sectioncnt \newcount\subsectioncnt
+\newcount\captioncnt \newcount\eqnocnt \newcount\sectioncnt \newcount\subsectioncnt
 \newif\ifsecti@nused
 
 \def\section#1{
@@ -100,6 +101,8 @@ end
     \vskip 1em
     \fi
     \secti@nusedfalse
+    \captioncnt=0
+    \eqnocnt=0
     \advance\subsectioncnt by 1
     \noindent{\subsectionfnt\the\sectioncnt.\the\subsectioncnt.\space#1}\par
     \vskip 1ex
@@ -254,9 +257,13 @@ end
     \fi
 }
 
-\def\Eqno{\global\advance\eqnocnt by 1 \eqno{(\the\eqnocnt)}}
+\def\Eqno{\global\advance\eqnocnt by 1 \eqno{(\the\sectioncnt.\the\subsectioncnt.\the\eqnocnt)}}
 \def\Eqnolbl#1{\global\advance\eqnocnt by 1
-\begingroup\edef\lblitem{(\the\eqnocnt)}\label{#1}\endgroup\eqno{(\the\eqnocnt)}}
+\begingroup\edef\lblitem{(\the\sectioncnt.\the\subsectioncnt.\the\eqnocnt)}\label{#1}\endgroup\eqno{(\the\sectioncnt.\the\subsectioncnt.\the\eqnocnt)}}
+
+\def\caption#1#2{\global\advance\captioncnt by 1
+\begingroup\edef\lblitem{{\bf Figure \the\sectioncnt.\the\subsectioncnt.\the\captioncnt}}\label{#1}%
+\centerline{{\bf Figure \the\sectioncnt.\the\subsectioncnt.\the\captioncnt:} #2}\endgroup}
 
 \directlua{
 function __MakeTheorem__(name)
@@ -399,8 +406,6 @@ end
 {\string\expandafter\string\def\string\csname\space#1\string\endcsname%
 {{\expandafter\strip\meaning\lblitem}}}}
 
-\def\ref#1{%
-    \ifundefined{#1}\message{! No ref. to #1;}%
-    \else\csname #1\endcsname\fi}
+\def\ref#1{\ifundefined{#1}{\bf [??]}\else\csname #1\endcsname\fi}
 
 \catcode`@=12 % END OF coprime.tex
