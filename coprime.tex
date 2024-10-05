@@ -3,12 +3,14 @@
 %%      author: Sungbae Jeong
 %%      coprime library for LuaPlainTex
 %%
+%%      This file is generated from emacs tangle with coprime.org. DO NOT EDIT THIS MANUALLY!
+%%
 %%      version 0.2.0
 %%
 
 \def\ifundefined#1{\expandafter\ifx\csname#1\endcsname\relax}
 \ifundefined{luatexversion}
-    \errmessage{Use luatex to compile this}
+	\errmessage{Use luatex to compile this}
 \fi
 
 \input ams-math
@@ -34,11 +36,11 @@
 
 \directlua{
 function __DefineFont__(fontName, fontSize, latinName, koreanName)
-    local latinFontName = [[\string\]] .. fontName .. "latin"
-    local hangulFontName = [[\string\]] .. fontName .. "hangul"
-    tex.print([[\string\font]] .. latinFontName .. "=" .. latinName .. " at " .. fontSize .. "pt")
-    tex.print([[\string\sethangulfont]] .. hangulFontName .. "=" .. koreanName .. " at " .. fontSize .. "pt")
-    tex.print([[\string\def\string\]] .. fontName .. "{" .. latinFontName .. hangulFontName .. "}")
+	local latinFontName = [[\string\]] .. fontName .. "latin"
+	local hangulFontName = [[\string\]] .. fontName .. "hangul"
+	tex.print([[\string\font]] .. latinFontName .. "=" .. latinName .. " at " .. fontSize .. "pt")
+	tex.print([[\string\sethangulfont]] .. hangulFontName .. "=" .. koreanName .. " at " .. fontSize .. "pt")
+	tex.print([[\string\def\string\]] .. fontName .. "{" .. latinFontName .. hangulFontName .. "}")
 end
 }
 \def\definefont#1#2#3#4{\directlua{__DefineFont__("#1",#2,"#3","#4")}}
@@ -59,8 +61,13 @@ end
 \definefont{huge}{20.74}{cmr10}{UnBatang}
 \definefont{Huge}{24.88}{cmr10}{UnBatang}
 
+\edef\pdfhorigin{\pdfvariable horigin}
+\edef\pdfvorigin{\pdfvariable vorigin}
 \def\pdfcolorstack{\pdfextension colorstack}
 \def\pdfcolorstackinit{\pdffeedback colorstackinit}
+\protected\def\pdfsetmatrix{\pdfextension setmatrix}
+\protected\def\pdfsave{\pdfextension save\relax}
+\protected\def\pdfrestore{\pdfextension restore\relax}
 
 \def\today{\ifcase\month\or
   January\or February\or March\or April\or May\or June\or
@@ -81,42 +88,50 @@ end
     tex.print([[\string\kern 3em]])
 }}
 
-\edef\pdfhorigin{\pdfvariable horigin}
-\edef\pdfvorigin{\pdfvariable vorigin}
-
 \newcount\captioncnt \newcount\eqnocnt \newcount\sectioncnt \newcount\subsectioncnt
 \newif\ifsecti@nused
 
 \def\section#1{
-    \vskip 1pc
-    \subsectioncnt=0
-    \advance\sectioncnt by 1
-    \noindent{\sectionfnt\the\sectioncnt.\space#1}\par
-    \vskip 1em
-    \secti@nusedtrue
+	\vskip 1pc
+	\subsectioncnt=0
+	\advance\sectioncnt by 1
+	\noindent{\sectionfnt\the\sectioncnt.\space#1}\par
+	\vskip 1em
+	\secti@nusedtrue
 }
 
 \def\subsection#1{
-    \ifsecti@nused\else
-    \vskip 1em
-    \fi
-    \secti@nusedfalse
-    \captioncnt=0
-    \eqnocnt=0
-    \advance\subsectioncnt by 1
-    \noindent{\subsectionfnt\the\sectioncnt.\the\subsectioncnt.\space#1}\par
-    \vskip 1ex
+	\ifsecti@nused\else
+	\vskip 1em
+	\fi
+	\secti@nusedfalse
+	\captioncnt=0
+	\eqnocnt=0
+	\advance\subsectioncnt by 1
+	\noindent{\subsectionfnt\the\sectioncnt.\the\subsectioncnt.\space#1}\par
+	\vskip 1ex
 }
 
-% simple implementation for resizing elements
-\protected\def\pdfsetmatrix{\pdfextension setmatrix}
-\protected\def\pdfsave{\pdfextension save\relax}
-\protected\def\pdfrestore{\pdfextension restore\relax}
-
-% NOTE: #1 must be an integer
 \def\resizebox#1#2{\setbox0=\hbox{#2}%
 \setbox1=\hbox{\pdfsave\pdfsetmatrix{#1 0 0 #1}\rlap{#2}\pdfrestore}%
 \ht1=#1\ht0 \wd1=#1\wd0 \box1\hbox to0pt{}}
+
+\def\reflectxbox#1{\setbox0=\hbox{#1}%
+\setbox1=\hbox{\pdfsave\pdfsetmatrix{-1 0 0 1}\rlap{#1}\pdfrestore}%
+\ht1=\ht0 \wd1=\wd0 \box1\hbox to0pt{}}
+
+\def\reflectybox#1{\setbox0=\hbox{#1}%
+\setbox1=\hbox{\pdfsave\pdfsetmatrix{1 0 0 -1}\rlap{#1}\pdfrestore}%
+\ht1=\ht0 \wd1=\wd0 \box1\hbox to0pt{}}
+
+\def\imghw#1#2{\hbox{\saveimageresource width#1 {#2}\useimageresource\lastsavedimageresourceindex}}
+\def\imgvw#1#2{\vbox{\saveimageresource width#1 {#2}\useimageresource\lastsavedimageresourceindex}}
+\def\imghh#1#2{\hbox{\saveimageresource height#1 {#2}\useimageresource\lastsavedimageresourceindex}}
+\def\imgvh#1#2{\vbox{\saveimageresource height#1 {#2}\useimageresource\lastsavedimageresourceindex}}
+\def\imghraw#1{\hbox{\saveimageresource{#1}\useimageresource\lastsavedimageresourceindex}}
+\def\imgvraw#1{\vbox{\saveimageresource{#1}\useimageresource\lastsavedimageresourceindex}}
+\def\imghex#1#2{\hbox{\saveimageresource #1 {#2}\useimageresource\lastsavedimageresourceindex}}
+\def\imgvex#1#2{\vbox{\saveimageresource #1 {#2}\useimageresource\lastsavedimageresourceindex}}
 
 \mathchardef\colorcnt=\pdfcolorstackinit page {0 g 0 G}
 \def\colorpop{\pdfcolorstack\colorcnt pop}
@@ -139,6 +154,10 @@ end
 \def\CyanCustom#1{\colorpush{#1 0 0 0}\aftergroup\colorpop}
 \def\MagentaCustom#1{\colorpush{0 #1 0 0}\aftergroup\colorpop}
 \def\YellowCustom#1{\colorpush{0 0 #1 0}\aftergroup\colorpop}
+
+\def\caption#1#2{\global\advance\captioncnt by 1
+\begingroup\edef\lblitem{{\bf Figure \the\sectioncnt.\the\subsectioncnt.\the\captioncnt}}\label{#1}%
+\centerline{{\bf Figure \the\sectioncnt.\the\subsectioncnt.\the\captioncnt:} #2}\endgroup}
 
 \def\bbb{\fam\bbfam}
 
@@ -188,8 +207,6 @@ end
 \let\R=\Rb
 \let\C=\Cb
 
-\let\diff=\partial
-
 \def\defeq{\mathbin{:=}}
 \def\symdiff{\mathbin{\triangle}}
 \def\sing{\mathrel{\bot}}
@@ -202,6 +219,7 @@ end
 \def\sgn{\mathop{\rm sgn}}
 \def\diam{\mathop{\rm diam}}
 \def\supp{\mathop{\rm supp}}
+\let\diff=\partial
 
 \def\limsup{\mathop{\overline{\lim}}}
 \def\liminf{\mathop{\vcenter{\hbox{$\underline{\lim}$}}}}
@@ -211,158 +229,154 @@ end
 \def\cupdot{\mathbin{\ooalign{\hfil$\cup$\hfil\cr\hfil$\cdot$\hfil\cr}}}
 
 \def\@bigcupdot#1#2#3#4{%
-    \setbox0=\hbox{$#1\bigcup$}
-    \setbox1=\hbox{\ooalign{\hfil$#1\bigcup$\hfil\cr\hfil\raise#3\hbox{$#2$}\hfil\cr}}
-    \vcenter{\box1\kern#4\hbox{}}
+	\setbox0=\hbox{$#1\bigcup$}
+	\setbox1=\hbox{\ooalign{\hfil$#1\bigcup$\hfil\cr\hfil\raise#3\hbox{$#2$}\hfil\cr}}
+	\vcenter{\box1\kern#4\hbox{}}
 }
 \def\bigcupdot{\mathop{\mathchoice
-    {\@bigcupdot{\displaystyle}{\scriptstyle\bullet}{1pt}{-8pt}}
-    {\@bigcupdot{\textstyle}{\scriptscriptstyle\bullet}{1pt}{-10pt}}
-    {\@bigcupdot{\scriptstyle}{\scriptscriptstyle\bullet}{0.7pt}{-12pt}}
-    {\@bigcupdot{\scriptscriptstyle}{\cdot}{-1pt}{-12pt}}
+	{\@bigcupdot{\displaystyle}{\scriptstyle\bullet}{1pt}{-8pt}}
+	{\@bigcupdot{\textstyle}{\scriptscriptstyle\bullet}{1pt}{-10pt}}
+	{\@bigcupdot{\scriptstyle}{\scriptscriptstyle\bullet}{0.7pt}{-12pt}}
+	{\@bigcupdot{\scriptscriptstyle}{\cdot}{-1pt}{-12pt}}
 }}
 
 \def\unif@rm#1#2#3{\mathrel{\raise#2\hbox{$#1\rightarrow$}\mkern#3\lower#2\hbox{$#1\rightarrow$}}}
 \def\uniform{%
-    \mathchoice{\unif@rm\displaystyle{2.5pt}{-18mu}}
-        {\unif@rm\textstyle{2.5pt}{-18mu}}
-        {\unif@rm\scriptstyle{1.8pt}{-18mu}}
-        {\unif@rm\scriptscriptstyle{1.2pt}{-17mu}}
+	\mathchoice{\unif@rm\displaystyle{2.5pt}{-18mu}}
+		{\unif@rm\textstyle{2.5pt}{-18mu}}
+		{\unif@rm\scriptstyle{1.8pt}{-18mu}}
+		{\unif@rm\scriptscriptstyle{1.2pt}{-17mu}}
 }
 \def\converges #1 to #2 with #3{%
-    \ifx\uniform#3{#1}\uniform{#2}%
-    \else{#1}\buildrel{#3}\over\to{#2}%
-    \fi
+	\ifx\uniform#3{#1}\uniform{#2}%
+	\else{#1}\buildrel{#3}\over\to{#2}%
+	\fi
 }
 \let\converge=\converges
 
 \def\provedboxinit{\vbox{%
-    \hrule\hbox{\vrule\kern 3pt\vbox{\kern 3pt\hbox{}\kern 3pt}%
-    \kern 3pt\vrule}\hrule
+	\hrule\hbox{\vrule\kern 3pt\vbox{\kern 3pt\hbox{}\kern 3pt}%
+	\kern 3pt\vrule}\hrule
 }}
 
 \def\lemmaprovedboxinit{\vrule height1.5ex width1.1ex}
 
 \def\provedbox{%
-    {\unskip\nobreak\hfil\penalty50
-    \hfil\phantom{\provedboxinit}\nobreak\hfil\provedboxinit
-    \parfillskip=0pt \finalhyphendemerits=0 \par}%
+	{\unskip\nobreak\hfil\penalty50
+	\hfil\phantom{\provedboxinit}\nobreak\hfil\provedboxinit
+	\parfillskip=0pt \finalhyphendemerits=0 \par}%
 }
 
 \def\proved{\ifmmode\eqno\hbox{\provedboxinit}\else\provedbox\fi}
 
 \def\lemmaproved{%
-    \ifmmode\eqno\hbox{\lemmaprovedboxinit}
-    \else\hfill\lemmaprovedboxinit
-    \fi
+	\ifmmode\eqno\hbox{\lemmaprovedboxinit}
+	\else\hfill\lemmaprovedboxinit
+	\fi
 }
 
 \def\Eqno{\global\advance\eqnocnt by 1 \eqno{(\the\sectioncnt.\the\subsectioncnt.\the\eqnocnt)}}
 \def\Eqnolbl#1{\global\advance\eqnocnt by 1
 \begingroup\edef\lblitem{(\the\sectioncnt.\the\subsectioncnt.\the\eqnocnt)}\label{#1}\endgroup\eqno{(\the\sectioncnt.\the\subsectioncnt.\the\eqnocnt)}}
 
-\def\caption#1#2{\global\advance\captioncnt by 1
-\begingroup\edef\lblitem{{\bf Figure \the\sectioncnt.\the\subsectioncnt.\the\captioncnt}}\label{#1}%
-\centerline{{\bf Figure \the\sectioncnt.\the\subsectioncnt.\the\captioncnt:} #2}\endgroup}
-
 \directlua{
 function __MakeTheorem__(name)
-    local string = require("string")
-    local count = [[\string\newcount\string\]] .. name .. "cnt"
-    local start_def = [[\string\def\string\]] .. string.lower(name) .. [[{
-    \string\par\string\penalty-50\string\advance\string\]] .. name .. [[cnt by 1
-    \string\begingroup
-    \string\postdisplaypenalty=10000
-    \string\vskip 1.5ex
-    \string\hrule\space height 0.7pt\string\nobreak
-    \string\vskip 1.5ex
-    \string\noindent{\string\bf\space]] .. name ..
-    [[\space\string\the\string\sectioncnt.\string\the\string\]] .. name .. [[cnt}\string\kern 1em
-    \string\def\string\proof{%
-        \string\par\string\hbox\space to\string\hsize{\string\xleaders\string\hbox\space
-        to.8em{\string\hss-\string\hss}\string\hfill}
-        \string\noindent{\string\it\space proof.}
-    }
-    \string\edef\string\lblitem{{\string\bf\space]] .. name ..
-    [[\space\string\the\string\sectioncnt.\string\the\string\]] .. name .. [[cnt}}\string\relax
+	local string = require("string")
+	local count = [[\string\newcount\string\]] .. name .. "cnt"
+	local start_def = [[\string\def\string\]] .. string.lower(name) .. [[{
+	\string\par\string\penalty-50\string\advance\string\]] .. name .. [[cnt by 1
+	\string\begingroup
+	\string\postdisplaypenalty=10000
+	\string\vskip 1.5ex
+	\string\hrule\space height 0.7pt\string\nobreak
+	\string\vskip 1.5ex
+	\string\noindent{\string\bf\space]] .. name ..
+	[[\space\string\the\string\sectioncnt.\string\the\string\]] .. name .. [[cnt}\string\kern 1em
+	\string\def\string\proof{%
+		\string\par\string\hbox\space to\string\hsize{\string\xleaders\string\hbox\space
+		to.8em{\string\hss-\string\hss}\string\hfill}
+		\string\noindent{\string\it\space proof.}
+	}
+	\string\edef\string\lblitem{{\string\bf\space]] .. name ..
+	[[\space\string\the\string\sectioncnt.\string\the\string\]] .. name .. [[cnt}}\string\relax
 }]]
 
-    local end_def = [[\string\def\string\end]] .. string.lower(name) .. [[{%
-    \string\par\string\penalty10000
-    \string\vskip1.5ex
-    \string\hrule\space height 0.7pt
-    \string\endgroup\string\par
-    \string\vskip 1.5ex
+	local end_def = [[\string\def\string\end]] .. string.lower(name) .. [[{%
+	\string\par\string\penalty10000
+	\string\vskip1.5ex
+	\string\hrule\space height 0.7pt
+	\string\endgroup\string\par
+	\string\vskip 1.5ex
 }]]
-    tex.print(count)
-    tex.print(start_def)
-    tex.print(end_def)
+	tex.print(count)
+	tex.print(start_def)
+	tex.print(end_def)
 end
 
 function __MakeTheoremWithName__(name)
-    local string = require("string")
-    local count = [[\string\newcount\string\]] .. name .. "cnt"
-    local start_def = [[\string\def\string\name]] .. string.lower(name) .. [[\string#1{
-    \string\par\string\penalty-50\string\advance\string\]] .. name .. [[cnt by 1
-    \string\begingroup
-    \string\postdisplaypenalty=10000
-    \string\vskip 1.5ex
-    \string\hrule\space height 0.7pt\string\nobreak
-    \string\vskip 1.5ex
-    \string\noindent{\string\bf\space]] .. name ..
-    [[\space\string\the\string\sectioncnt.\string\the\string\]] .. name ..
-    [[cnt}\space(\string#1)\string\kern 1em
-    \string\def\string\proof{%
-        \string\par\string\hbox\space to\string\hsize{\string\xleaders\string\hbox\space
-        to.8em{\string\hss-\string\hss}\string\hfill}
-        \string\noindent{\string\it\space proof.}
-    }
-    \string\edef\string\lblitem{{\string\bf\space]] .. name ..
-    [[\space\string\the\string\sectioncnt.\string\the\string\]] .. name .. [[cnt}}\string\relax
+	local string = require("string")
+	local count = [[\string\newcount\string\]] .. name .. "cnt"
+	local start_def = [[\string\def\string\name]] .. string.lower(name) .. [[\string#1{
+	\string\par\string\penalty-50\string\advance\string\]] .. name .. [[cnt by 1
+	\string\begingroup
+	\string\postdisplaypenalty=10000
+	\string\vskip 1.5ex
+	\string\hrule\space height 0.7pt\string\nobreak
+	\string\vskip 1.5ex
+	\string\noindent{\string\bf\space]] .. name ..
+	[[\space\string\the\string\sectioncnt.\string\the\string\]] .. name ..
+	[[cnt}\space(\string#1)\string\kern 1em
+	\string\def\string\proof{%
+		\string\par\string\hbox\space to\string\hsize{\string\xleaders\string\hbox\space
+		to.8em{\string\hss-\string\hss}\string\hfill}
+		\string\noindent{\string\it\space proof.}
+	}
+	\string\edef\string\lblitem{{\string\bf\space]] .. name ..
+	[[\space\string\the\string\sectioncnt.\string\the\string\]] .. name .. [[cnt}}\string\relax
 }]]
 
-    local end_def = [[\string\def\string\end]] .. string.lower(name) .. [[{%
-    \string\par\string\penalty10000
-    \string\vskip1.5ex
-    \string\hrule\space height 0.7pt
-    \string\endgroup\string\par
-    \string\vskip 1.5ex
+	local end_def = [[\string\def\string\end]] .. string.lower(name) .. [[{%
+	\string\par\string\penalty10000
+	\string\vskip1.5ex
+	\string\hrule\space height 0.7pt
+	\string\endgroup\string\par
+	\string\vskip 1.5ex
 }]]
-    tex.print(count)
-    tex.print(start_def)
-    tex.print(end_def)
+	tex.print(count)
+	tex.print(start_def)
+	tex.print(end_def)
 end
 }
 
 \def\thmbox#1{%
-    \par\penalty-50 \begingroup \postdisplaypenalty=10000 \vskip 1.5ex
-    \hrule height0.7pt\nobreak \vskip 1.5ex
-    \noindent{\bf#1.}\kern-5pt
-    \def\proof{%
-        \par\hbox to\hsize{\xleaders\hbox to.8em{\hss-\hss}\hfill}
-        \noindent{\it proof.}
-    }
-    \edef\lblitem{{\bf#1}}\relax
+	\par\penalty-50 \begingroup \postdisplaypenalty=10000 \vskip 1.5ex
+	\hrule height0.7pt\nobreak \vskip 1.5ex
+	\noindent{\bf#1.}\kern-5pt
+	\def\proof{%
+		\par\hbox to\hsize{\xleaders\hbox to.8em{\hss-\hss}\hfill}
+		\noindent{\it proof.}
+	}
+	\edef\lblitem{{\bf#1}}\relax
 }
 
 \def\thmboxN#1#2{%
-    \par\penalty-50 \begingroup \postdisplaypenalty=10000 \vskip 1.5ex
-    \hrule height0.7pt\nobreak \vskip 1.5ex
-    \noindent{\bf#1 (#2).}\kern-5pt
-    \def\proof{%
-        \par\hbox to\hsize{\xleaders\hbox to.8em{\hss-\hss}\hfill}
-        \noindent{\it proof.}
-    }
-    \edef\lblitem{{\bf#1}}\relax
+	\par\penalty-50 \begingroup \postdisplaypenalty=10000 \vskip 1.5ex
+	\hrule height0.7pt\nobreak \vskip 1.5ex
+	\noindent{\bf#1 (#2).}\kern-5pt
+	\def\proof{%
+		\par\hbox to\hsize{\xleaders\hbox to.8em{\hss-\hss}\hfill}
+		\noindent{\it proof.}
+	}
+	\edef\lblitem{{\bf#1}}\relax
 }
 \def\endthmbox{\par\penalty10000 \vskip 1.5ex \hrule height0.7pt \endgroup\par \vskip 1.5ex }
 
 \def\pf{%
-    \par\hbox to\hsize{\xleaders\hbox to.8em{\hss-\hss}\hfill}
-    \noindent{\it proof.}
+	\par\hbox to\hsize{\xleaders\hbox to.8em{\hss-\hss}\hfill}
+	\noindent{\it proof.}
 }
 \def\endpf{%
-    \par\penalty10000\hbox to\hsize{\xleaders\hbox to.8em{\hss-\hss}\hfill}\vskip 1.5ex
+	\par\penalty10000\hbox to\hsize{\xleaders\hbox to.8em{\hss-\hss}\hfill}\vskip 1.5ex
 }
 
 \def\maketheorem#1{\directlua{__MakeTheorem__("#1")}}
@@ -380,14 +394,16 @@ end
 \maketheoremwithname{Corollary}
 \maketheoremwithname{Lemma}
 
-\let\defin=\definition
-\let\enddefin=\enddefinition
-\let\thm=\theorem
-\let\endthm=\endtheorem
-\let\prop=\proposition
-\let\endprop=\endproposition
-\let\coro=\corollary
-\let\endcoro=\endcorollary
+\let\defin=\Definition
+\let\enddefin=\endDefinition
+\let\thm=\Theorem
+\let\endthm=\endTheorem
+\let\prop=\Proposition
+\let\endprop=\endProposition
+\let\coro=\Corollary
+\let\endcoro=\endCorollary
+\let\lemma=\Lemma
+\let\endlemma=\endLemma
 
 \let\namedefin=\namedefinition
 \let\namethm=\nametheorem
