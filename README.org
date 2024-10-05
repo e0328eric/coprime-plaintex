@@ -1,0 +1,576 @@
+#+TITLE: coprime LuaTeX package
+#+AUTHOR: Sungbae Jeong
+#+DATE: 2024-10-05
+#+PROPERTY: header-args :tangle coprime.tex
+#+auto_tangle: t
+
+* Introdoction
+This is a =coprime= package for LuaTeX.
+
+* Header of the package
+#+BEGIN_SRC tex
+  %%
+  %%      coprime.tex
+  %%      author: Sungbae Jeong
+  %%      coprime library for LuaPlainTex
+  %%
+  %%      This file is generated from emacs tangle with coprime.org. DO NOT EDIT THIS MANUALLY!
+  %%
+  %%      version 0.2.0
+  %%
+#+END_SRC
+
+* Basic Settings
+** Check the engine
+Since this package uses lua scripts, it does not compile unless a user uses LuaTeX engine.
+This code checks the engine which compiles a project using this package.
+#+BEGIN_SRC tex
+  \def\ifundefined#1{\expandafter\ifx\csname#1\endcsname\relax}
+  \ifundefined{luatexversion}
+	  \errmessage{Use luatex to compile this}
+  \fi
+#+END_SRC
+
+** Import Libraries
+#+BEGIN_SRC tex
+  \input ams-math
+  \input kotexplain
+  \input tikz
+#+END_SRC
+
+** Start Implementation
+This part makes the character =@= a letter so that it can be used in the
+definition name
+#+BEGIN_SRC tex
+  \catcode`@=11
+#+END_SRC
+
+** Define Fonts
+To use mathematical fonts, for instance blackboard font, in plaintex, we should define new font families.
+#+BEGIN_SRC tex
+  \font\tenamsb=msbm10 \font\sevenamsb=msbm7 \font\fiveamsb=msbm5
+  \newfam\bbfam
+  \textfont\bbfam=\tenamsb
+  \scriptfont\bbfam=\sevenamsb
+  \scriptscriptfont\bbfam=\fiveamsb
+
+  \font\teneufm=eusm10 \font\seveneufm=eusm7 \font\fiveeufm=eusm5
+  \newfam\eufmfam
+  \textfont\eufmfam=\teneufm
+  \scriptfont\eufmfam=\seveneufm
+  \scriptscriptfont\eufmfam=\fiveeufm
+  \def\eufm{\fam\eufmfam}
+
+  \let\scr=\script
+#+END_SRC
+
+Also, we need several fonts related to size. Since we use LuaTex with
+kotexplain, we should define fonts for latin and korean, respectively. Using lua
+script, we can make some template.
+#+BEGIN_SRC tex
+  \directlua{
+  function __DefineFont__(fontName, fontSize, latinName, koreanName)
+	  local latinFontName = [[\string\]] .. fontName .. "latin"
+	  local hangulFontName = [[\string\]] .. fontName .. "hangul"
+	  tex.print([[\string\font]] .. latinFontName .. "=" .. latinName .. " at " .. fontSize .. "pt")
+	  tex.print([[\string\sethangulfont]] .. hangulFontName .. "=" .. koreanName .. " at " .. fontSize .. "pt")
+	  tex.print([[\string\def\string\]] .. fontName .. "{" .. latinFontName .. hangulFontName .. "}")
+  end
+  }
+  \def\definefont#1#2#3#4{\directlua{__DefineFont__("#1",#2,"#3","#4")}}
+#+END_SRC
+
+Using the upper command, we can make =\definefont= command. For example,
+=\large= command can be defined by =\definefont{large}{12}{cmr10}{UnBatang}=.
+#+BEGIN_SRC tex
+  \definefont{titlefnt}{16}{cmbx10}{UnBatangBold}
+  \definefont{authorfnt}{11}{cmr10}{UnBatang}
+  \definefont{datefnt}{11}{cmr10}{UnBatang}
+  \definefont{sectionfnt}{14}{cmbx10}{UnBatangBold}
+  \definefont{subsectionfnt}{11.5}{cmbx10}{UnBatangBold}
+
+  \definefont{tiny}{5}{cmr10}{UnBatang}
+  \definefont{footnotesize}{8}{cmr10}{UnBatang}
+  \definefont{small}{9}{cmr10}{UnBatang}
+  \definefont{normalsize}{10}{cmr10}{UnBatang}
+  \definefont{large}{12}{cmr10}{UnBatang}
+  \definefont{Large}{14.4}{cmr10}{UnBatang}
+  \definefont{LARGE}{17.28}{cmr10}{UnBatang}
+  \definefont{huge}{20.74}{cmr10}{UnBatang}
+  \definefont{Huge}{24.88}{cmr10}{UnBatang}
+#+END_SRC
+
+** Remap PdfTeX primitives
+LuaTeX uses three primitives =\pdfextension=, =\pdfvariable= and =\pdffeedback=
+to describe all of PdfTex primitives. To be minimal, PdfTeX primitives are
+redefined as long as it is used.
+#+BEGIN_SRC tex
+  \edef\pdfhorigin{\pdfvariable horigin}
+  \edef\pdfvorigin{\pdfvariable vorigin}
+  \def\pdfcolorstack{\pdfextension colorstack}
+  \def\pdfcolorstackinit{\pdffeedback colorstackinit}
+  \protected\def\pdfsetmatrix{\pdfextension setmatrix}
+  \protected\def\pdfsave{\pdfextension save\relax}
+  \protected\def\pdfrestore{\pdfextension restore\relax}
+#+END_SRC
+
+* Title
+** Title Command
+#+BEGIN_SRC tex
+\def\today{\ifcase\month\or
+  January\or February\or March\or April\or May\or June\or
+  July\or August\or September\or October\or November\or December\fi
+  \space\number\day, \number\year}
+\def\title#1#2#3{\directlua{
+    tex.print([[\string\centerline{\string\titlefnt\space #1}]])
+    tex.print([[\string\kern 0.8em]])
+    tex.print([[\string\centerline{\string\datefnt\space #2}]])
+    tex.print([[\string\kern 0.8em]])
+
+    if "#3" == "" then
+    tex.print([[\string\centerline{\string\datefnt\space\string\today}]])
+    else
+    tex.print([[\string\centerline{\string\datefnt\space #3}]])
+    end
+
+    tex.print([[\string\kern 3em]])
+}}
+#+END_SRC
+* Sections
+** Define registers
+To make section function, we need to define some registers.
+#+BEGIN_SRC tex
+  \newcount\captioncnt \newcount\eqnocnt \newcount\sectioncnt \newcount\subsectioncnt
+  \newif\ifsecti@nused
+#+END_SRC
+
+** Section Function
+It is easy to make a section function.
+#+BEGIN_SRC tex
+  \def\section#1{
+	  \vskip 1pc
+	  \subsectioncnt=0
+	  \advance\sectioncnt by 1
+	  \noindent{\sectionfnt\the\sectioncnt.\space#1}\par
+	  \vskip 1em
+	  \secti@nusedtrue
+  }
+#+END_SRC
+
+** Subsection Function
+Subsection function is similar with =\seciton=.
+#+BEGIN_SRC tex
+  \def\subsection#1{
+	  \ifsecti@nused\else
+	  \vskip 1em
+	  \fi
+	  \secti@nusedfalse
+	  \captioncnt=0
+	  \eqnocnt=0
+	  \advance\subsectioncnt by 1
+	  \noindent{\subsectionfnt\the\sectioncnt.\the\subsectioncnt.\space#1}\par
+	  \vskip 1ex
+  }
+#+END_SRC
+
+* Minimal Implementation of =graphicx.sty=
+** Resizebox
+=\resizebox= takes two values: one is the *magnitute* and the second variable is
+the actual stuff to resize.
+#+BEGIN_SRC tex
+  \def\resizebox#1#2{\setbox0=\hbox{#2}%
+  \setbox1=\hbox{\pdfsave\pdfsetmatrix{#1 0 0 #1}\rlap{#2}\pdfrestore}%
+  \ht1=#1\ht0 \wd1=#1\wd0 \box1\hbox to0pt{}}
+#+END_SRC
+
+** Reflectbox
+=coprime= package supports two functions to reflect stuff with respect to x axis
+and y axis.
+#+BEGIN_SRC tex
+  \def\reflectxbox#1{\setbox0=\hbox{#1}%
+  \setbox1=\hbox{\pdfsave\pdfsetmatrix{-1 0 0 1}\rlap{#1}\pdfrestore}%
+  \ht1=\ht0 \wd1=\wd0 \box1\hbox to0pt{}}
+
+  \def\reflectybox#1{\setbox0=\hbox{#1}%
+  \setbox1=\hbox{\pdfsave\pdfsetmatrix{1 0 0 -1}\rlap{#1}\pdfrestore}%
+  \ht1=\ht0 \wd1=\wd0 \box1\hbox to0pt{}}
+#+END_SRC
+
+** Rotationbox
+I can also make a rotationbox, but for now, it does not supported
+
+** Including Images
+Here is a simple implementation for including graphics.
+=coprime= package supports eight functions to include graphics.
+It generates boxes which contains image.
+#+BEGIN_SRC tex
+  \def\imghw#1#2{\hbox{\saveimageresource width#1 {#2}\useimageresource\lastsavedimageresourceindex}}
+  \def\imgvw#1#2{\vbox{\saveimageresource width#1 {#2}\useimageresource\lastsavedimageresourceindex}}
+  \def\imghh#1#2{\hbox{\saveimageresource height#1 {#2}\useimageresource\lastsavedimageresourceindex}}
+  \def\imgvh#1#2{\vbox{\saveimageresource height#1 {#2}\useimageresource\lastsavedimageresourceindex}}
+  \def\imghraw#1{\hbox{\saveimageresource{#1}\useimageresource\lastsavedimageresourceindex}}
+  \def\imgvraw#1{\vbox{\saveimageresource{#1}\useimageresource\lastsavedimageresourceindex}}
+  \def\imghex#1#2{\hbox{\saveimageresource #1 {#2}\useimageresource\lastsavedimageresourceindex}}
+  \def\imgvex#1#2{\vbox{\saveimageresource #1 {#2}\useimageresource\lastsavedimageresourceindex}}
+#+END_SRC
+
+* Colors
+These commands makes colors. Using these, basic colors are implemented.
+#+BEGIN_SRC tex
+  \mathchardef\colorcnt=\pdfcolorstackinit page {0 g 0 G}
+  \def\colorpop{\pdfcolorstack\colorcnt pop}
+  \def\colorpush#1{\pdfcolorstack\colorcnt push {#1 k #1 K}}
+  \def\colorset#1{\pdfcolorstack\colorcnt set {#1 k #1 K}}
+  \def\grayscalepush#1{\pdfcolorstack\colorcnt push {#1 g #1 G}}
+  \def\grayscaleset#1{\pdfcolorstack\colorcnt set {#1 g #1 G}}
+#+END_SRC
+
+Default colors are following:
+#+BEGIN_SRC tex
+  \def\Red{\colorpush{0 1 1 0}\aftergroup\colorpop}
+  \def\Blue{\colorpush{1 1 0 0}\aftergroup\colorpop}
+  \def\Green{\colorpush{1 0 1 0}\aftergroup\colorpop}
+  \def\Cyan{\colorpush{1 0 0 0}\aftergroup\colorpop}
+  \def\Magenta{\colorpush{0 1 0 0}\aftergroup\colorpop}
+  \def\Yellow{\colorpush{0 0 1 0}\aftergroup\colorpop}
+  \def\Black{\grayscalepush{0}\aftergroup\colorpop}
+  \def\White{\grayscalepush{1}\aftergroup\colorpop}
+  \def\RedCustom#1{\colorpush{0 #1 #1 0}\aftergroup\colorpop}
+  \def\BlueCustom#1{\colorpush{#1 #1 0 0}\aftergroup\colorpop}
+  \def\GreenCustom#1{\colorpush{#1 0 #1 0}\aftergroup\colorpop}
+  \def\CyanCustom#1{\colorpush{#1 0 0 0}\aftergroup\colorpop}
+  \def\MagentaCustom#1{\colorpush{0 #1 0 0}\aftergroup\colorpop}
+  \def\YellowCustom#1{\colorpush{0 0 #1 0}\aftergroup\colorpop}
+#+END_SRC
+
+* Figure Caption
+** Caption
+This is a just simple caption like LaTeX
+#+BEGIN_SRC tex
+  \def\caption#1#2{\global\advance\captioncnt by 1
+  \begingroup\edef\lblitem{{\bf Figure \the\sectioncnt.\the\subsectioncnt.\the\captioncnt}}\label{#1}%
+  \centerline{{\bf Figure \the\sectioncnt.\the\subsectioncnt.\the\captioncnt:} #2}\endgroup}
+#+END_SRC
+
+* Math Commands
+** Convinent command to use blackboard font
+#+BEGIN_SRC tex
+  \def\bbb{\fam\bbfam}
+#+END_SRC
+
+** Special Math Alphabets
+Hard coded for capital letters at each mathematical fonts
+#+BEGIN_SRC tex
+  \def\Af{{\frak A}} \def\Bf{{\frak B}} \def\Cf{{\frak C}} \def\Df{{\frak D}}
+  \def\Ef{{\frak E}} \def\Ff{{\frak F}} \def\Gf{{\frak G}} \def\Hf{{\frak H}}
+  \def\If{{\frak I}} \def\Jf{{\frak J}} \def\Kf{{\frak K}} \def\Lf{{\frak L}}
+  \def\Mf{{\frak M}} \def\Nf{{\frak N}} \def\Of{{\frak O}} \def\Pf{{\frak P}}
+  \def\Qf{{\frak Q}} \def\Rf{{\frak R}} \def\Sf{{\frak S}} \def\Tf{{\frak T}}
+  \def\Uf{{\frak U}} \def\Vf{{\frak V}} \def\Wf{{\frak W}} \def\Xf{{\frak X}}
+  \def\Yf{{\frak Y}} \def\Zf{{\frak Z}}
+
+  \def\Ac{{\cal A}} \def\Bc{{\cal B}} \def\Cc{{\cal C}} \def\Dc{{\cal D}}
+  \def\Ec{{\cal E}} \def\Fc{{\cal F}} \def\Gc{{\cal G}} \def\Hc{{\cal H}}
+  \def\Ic{{\cal I}} \def\Jc{{\cal J}} \def\Kc{{\cal K}} \def\Lc{{\cal L}}
+  \def\Mc{{\cal M}} \def\Nc{{\cal N}} \def\Oc{{\cal O}} \def\Pc{{\cal P}}
+  \def\Qc{{\cal Q}} \def\Rc{{\cal R}} \def\Sc{{\cal S}} \def\Tc{{\cal T}}
+  \def\Uc{{\cal U}} \def\Vc{{\cal V}} \def\Wc{{\cal W}} \def\Xc{{\cal X}}
+  \def\Yc{{\cal Y}} \def\Zc{{\cal Z}}
+
+  \def\As{{\scr A}} \def\Bs{{\scr B}} \def\Cs{{\scr C}} \def\Ds{{\scr D}}
+  \def\Es{{\scr E}} \def\Fs{{\scr F}} \def\Gs{{\scr G}} \def\Hs{{\scr H}}
+  \def\Is{{\scr I}} \def\Js{{\scr J}} \def\Ks{{\scr K}} \def\Ls{{\scr L}}
+  \def\Ms{{\scr M}} \def\Ns{{\scr N}} \def\Os{{\scr O}} \def\Ps{{\scr P}}
+  \def\Qs{{\scr Q}} \def\Rs{{\scr R}} \def\Ss{{\scr S}} \def\Ts{{\scr T}}
+  \def\Us{{\scr U}} \def\Vs{{\scr V}} \def\Ws{{\scr W}} \def\Xs{{\scr X}}
+  \def\Ys{{\scr Y}} \def\Zs{{\scr Z}}
+
+  \def\Ab{{\bbb A}} \def\Bb{{\bbb B}} \def\Cb{{\bbb C}} \def\Db{{\bbb D}}
+  \def\Eb{{\bbb E}} \def\Fb{{\bbb F}} \def\Gb{{\bbb G}} \def\Hb{{\bbb H}}
+  \def\Ib{{\bbb I}} \def\Jb{{\bbb J}} \def\Kb{{\bbb K}} \def\Lb{{\bbb L}}
+  \def\Mb{{\bbb M}} \def\Nb{{\bbb N}} \def\Ob{{\bbb O}} \def\Pb{{\bbb P}}
+  \def\Qb{{\bbb Q}} \def\Rb{{\bbb R}} \def\Sb{{\bbb S}} \def\Tb{{\bbb T}}
+  \def\Ub{{\bbb U}} \def\Vb{{\bbb V}} \def\Wb{{\bbb W}} \def\Xb{{\bbb X}}
+  \def\Yb{{\bbb Y}} \def\Zb{{\bbb Z}}
+
+  \def\Ae{{\eufm A}} \def\Be{{\eufm B}} \def\Ce{{\eufm C}} \def\De{{\eufm D}}
+  \def\Ee{{\eufm E}} \def\Fe{{\eufm F}} \def\Ge{{\eufm G}} \def\He{{\eufm H}}
+  \def\Ie{{\eufm I}} \def\Je{{\eufm J}} \def\Ke{{\eufm K}} \def\Le{{\eufm L}}
+  \def\Me{{\eufm M}} \def\Ne{{\eufm N}} \def\Oe{{\eufm O}} \def\Pe{{\eufm P}}
+  \def\Qe{{\eufm Q}} \def\Re{{\eufm R}} \def\Se{{\eufm S}} \def\Te{{\eufm T}}
+  \def\Ue{{\eufm U}} \def\Ve{{\eufm V}} \def\We{{\eufm W}} \def\Xe{{\eufm X}}
+  \def\Ye{{\eufm Y}} \def\Ze{{\eufm Z}}
+#+END_SRC
+
+** Number System
+#+BEGIN_SRC tex
+  \let\N=\Nb
+  \let\Z=\Zb
+  \let\Q=\Qb
+  \let\R=\Rb
+  \let\C=\Cb
+#+END_SRC
+
+** Basic Mathematical Functions
+These are basic symbols in use.
+#+BEGIN_SRC tex
+  \def\defeq{\mathbin{:=}}
+  \def\symdiff{\mathbin{\triangle}}
+  \def\sing{\mathrel{\bot}}
+  \def\uc{{\frak c}}
+#+END_SRC
+The default emptyset symbol is ugly in my opinion. So remap it
+#+BEGIN_SRC tex
+\let\emptyset=\varnothing
+#+END_SRC
+These commands are well-known.
+#+BEGIN_SRC tex
+  \def\Re{\mathop{\rm Re}}
+  \def\Im{\mathop{\rm Im}}
+  \def\sgn{\mathop{\rm sgn}}
+  \def\diam{\mathop{\rm diam}}
+  \def\supp{\mathop{\rm supp}}
+  \let\diff=\partial
+#+END_SRC
+
+Default =\limsup= and =\liminf= are not for my style.
+#+BEGIN_SRC tex
+  \def\limsup{\mathop{\overline{\lim}}}
+  \def\liminf{\mathop{\vcenter{\hbox{$\underline{\lim}$}}}}
+  \let\lims=\limsup
+  \let\limi=\liminf
+#+END_SRC
+
+#+BEGIN_SRC tex
+  \def\cupdot{\mathbin{\ooalign{\hfil$\cup$\hfil\cr\hfil$\cdot$\hfil\cr}}}
+
+  \def\@bigcupdot#1#2#3#4{%
+	  \setbox0=\hbox{$#1\bigcup$}
+	  \setbox1=\hbox{\ooalign{\hfil$#1\bigcup$\hfil\cr\hfil\raise#3\hbox{$#2$}\hfil\cr}}
+	  \vcenter{\box1\kern#4\hbox{}}
+  }
+  \def\bigcupdot{\mathop{\mathchoice
+	  {\@bigcupdot{\displaystyle}{\scriptstyle\bullet}{1pt}{-8pt}}
+	  {\@bigcupdot{\textstyle}{\scriptscriptstyle\bullet}{1pt}{-10pt}}
+	  {\@bigcupdot{\scriptstyle}{\scriptscriptstyle\bullet}{0.7pt}{-12pt}}
+	  {\@bigcupdot{\scriptscriptstyle}{\cdot}{-1pt}{-12pt}}
+  }}
+#+END_SRC
+
+Now, following code is for easy usage of converging notations.
+#+BEGIN_SRC tex
+  \def\unif@rm#1#2#3{\mathrel{\raise#2\hbox{$#1\rightarrow$}\mkern#3\lower#2\hbox{$#1\rightarrow$}}}
+  \def\uniform{%
+	  \mathchoice{\unif@rm\displaystyle{2.5pt}{-18mu}}
+		  {\unif@rm\textstyle{2.5pt}{-18mu}}
+		  {\unif@rm\scriptstyle{1.8pt}{-18mu}}
+		  {\unif@rm\scriptscriptstyle{1.2pt}{-17mu}}
+  }
+  \def\converges #1 to #2 with #3{%
+	  \ifx\uniform#3{#1}\uniform{#2}%
+	  \else{#1}\buildrel{#3}\over\to{#2}%
+	  \fi
+  }
+  \let\converge=\converges
+#+END_SRC
+
+** Proved Box
+I use the white blank box to denote that the proof is finished. These commands are for that.
+#+BEGIN_SRC tex
+  \def\provedboxinit{\vbox{%
+	  \hrule\hbox{\vrule\kern 3pt\vbox{\kern 3pt\hbox{}\kern 3pt}%
+	  \kern 3pt\vrule}\hrule
+  }}
+
+  \def\lemmaprovedboxinit{\vrule height1.5ex width1.1ex}
+
+  \def\provedbox{%
+	  {\unskip\nobreak\hfil\penalty50
+	  \hfil\phantom{\provedboxinit}\nobreak\hfil\provedboxinit
+	  \parfillskip=0pt \finalhyphendemerits=0 \par}%
+  }
+
+  \def\proved{\ifmmode\eqno\hbox{\provedboxinit}\else\provedbox\fi}
+
+  \def\lemmaproved{%
+	  \ifmmode\eqno\hbox{\lemmaprovedboxinit}
+	  \else\hfill\lemmaprovedboxinit
+	  \fi
+  }
+#+END_SRC
+
+** Equation Numbering
+#+BEGIN_SRC tex
+  \def\Eqno{\global\advance\eqnocnt by 1 \eqno{(\the\sectioncnt.\the\subsectioncnt.\the\eqnocnt)}}
+  \def\Eqnolbl#1{\global\advance\eqnocnt by 1
+  \begingroup\edef\lblitem{(\the\sectioncnt.\the\subsectioncnt.\the\eqnocnt)}\label{#1}\endgroup\eqno{(\the\sectioncnt.\the\subsectioncnt.\the\eqnocnt)}}
+#+END_SRC
+
+** Theorems
+Using lua script, we can make *a template* for each theorems.
+#+BEGIN_SRC tex
+  \directlua{
+  function __MakeTheorem__(name)
+	  local string = require("string")
+	  local count = [[\string\newcount\string\]] .. name .. "cnt"
+	  local start_def = [[\string\def\string\]] .. string.lower(name) .. [[{
+	  \string\par\string\penalty-50\string\advance\string\]] .. name .. [[cnt by 1
+	  \string\begingroup
+	  \string\postdisplaypenalty=10000
+	  \string\vskip 1.5ex
+	  \string\hrule\space height 0.7pt\string\nobreak
+	  \string\vskip 1.5ex
+	  \string\noindent{\string\bf\space]] .. name ..
+	  [[\space\string\the\string\sectioncnt.\string\the\string\]] .. name .. [[cnt}\string\kern 1em
+	  \string\def\string\proof{%
+		  \string\par\string\hbox\space to\string\hsize{\string\xleaders\string\hbox\space
+		  to.8em{\string\hss-\string\hss}\string\hfill}
+		  \string\noindent{\string\it\space proof.}
+	  }
+	  \string\edef\string\lblitem{{\string\bf\space]] .. name ..
+	  [[\space\string\the\string\sectioncnt.\string\the\string\]] .. name .. [[cnt}}\string\relax
+  }]]
+
+	  local end_def = [[\string\def\string\end]] .. string.lower(name) .. [[{%
+	  \string\par\string\penalty10000
+	  \string\vskip1.5ex
+	  \string\hrule\space height 0.7pt
+	  \string\endgroup\string\par
+	  \string\vskip 1.5ex
+  }]]
+	  tex.print(count)
+	  tex.print(start_def)
+	  tex.print(end_def)
+  end
+
+  function __MakeTheoremWithName__(name)
+	  local string = require("string")
+	  local count = [[\string\newcount\string\]] .. name .. "cnt"
+	  local start_def = [[\string\def\string\name]] .. string.lower(name) .. [[\string#1{
+	  \string\par\string\penalty-50\string\advance\string\]] .. name .. [[cnt by 1
+	  \string\begingroup
+	  \string\postdisplaypenalty=10000
+	  \string\vskip 1.5ex
+	  \string\hrule\space height 0.7pt\string\nobreak
+	  \string\vskip 1.5ex
+	  \string\noindent{\string\bf\space]] .. name ..
+	  [[\space\string\the\string\sectioncnt.\string\the\string\]] .. name ..
+	  [[cnt}\space(\string#1)\string\kern 1em
+	  \string\def\string\proof{%
+		  \string\par\string\hbox\space to\string\hsize{\string\xleaders\string\hbox\space
+		  to.8em{\string\hss-\string\hss}\string\hfill}
+		  \string\noindent{\string\it\space proof.}
+	  }
+	  \string\edef\string\lblitem{{\string\bf\space]] .. name ..
+	  [[\space\string\the\string\sectioncnt.\string\the\string\]] .. name .. [[cnt}}\string\relax
+  }]]
+
+	  local end_def = [[\string\def\string\end]] .. string.lower(name) .. [[{%
+	  \string\par\string\penalty10000
+	  \string\vskip1.5ex
+	  \string\hrule\space height 0.7pt
+	  \string\endgroup\string\par
+	  \string\vskip 1.5ex
+  }]]
+	  tex.print(count)
+	  tex.print(start_def)
+	  tex.print(end_def)
+  end
+  }
+
+  \def\thmbox#1{%
+	  \par\penalty-50 \begingroup \postdisplaypenalty=10000 \vskip 1.5ex
+	  \hrule height0.7pt\nobreak \vskip 1.5ex
+	  \noindent{\bf#1.}\kern-5pt
+	  \def\proof{%
+		  \par\hbox to\hsize{\xleaders\hbox to.8em{\hss-\hss}\hfill}
+		  \noindent{\it proof.}
+	  }
+	  \edef\lblitem{{\bf#1}}\relax
+  }
+
+  \def\thmboxN#1#2{%
+	  \par\penalty-50 \begingroup \postdisplaypenalty=10000 \vskip 1.5ex
+	  \hrule height0.7pt\nobreak \vskip 1.5ex
+	  \noindent{\bf#1 (#2).}\kern-5pt
+	  \def\proof{%
+		  \par\hbox to\hsize{\xleaders\hbox to.8em{\hss-\hss}\hfill}
+		  \noindent{\it proof.}
+	  }
+	  \edef\lblitem{{\bf#1}}\relax
+  }
+  \def\endthmbox{\par\penalty10000 \vskip 1.5ex \hrule height0.7pt \endgroup\par \vskip 1.5ex }
+
+  \def\pf{%
+	  \par\hbox to\hsize{\xleaders\hbox to.8em{\hss-\hss}\hfill}
+	  \noindent{\it proof.}
+  }
+  \def\endpf{%
+	  \par\penalty10000\hbox to\hsize{\xleaders\hbox to.8em{\hss-\hss}\hfill}\vskip 1.5ex
+  }
+
+  \def\maketheorem#1{\directlua{__MakeTheorem__("#1")}}
+  \def\maketheoremwithname#1{\directlua{__MakeTheoremWithName__("#1")}}
+#+END_SRC
+
+This package gives four theorems: `Theorem`, `Proposition`, `Corollary` and `Lemma`.
+#+BEGIN_SRC tex
+  \maketheorem{Definition}
+  \maketheorem{Theorem}
+  \maketheorem{Proposition}
+  \maketheorem{Corollary}
+  \maketheorem{Lemma}
+
+  \maketheoremwithname{Definition}
+  \maketheoremwithname{Theorem}
+  \maketheoremwithname{Proposition}
+  \maketheoremwithname{Corollary}
+  \maketheoremwithname{Lemma}
+#+END_SRC
+
+However, since each name contains a capital letter and commands are quite long, the package supports some abbreviations.
+#+BEGIN_SRC tex
+  \let\defin=\Definition
+  \let\enddefin=\endDefinition
+  \let\thm=\Theorem
+  \let\endthm=\endTheorem
+  \let\prop=\Proposition
+  \let\endprop=\endProposition
+  \let\coro=\Corollary
+  \let\endcoro=\endCorollary
+  \let\lemma=\Lemma
+  \let\endlemma=\endLemma
+
+  \let\namedefin=\namedefinition
+  \let\namethm=\nametheorem
+  \let\nameprop=\nameproposition
+  \let\namecoro=\namecorollary
+#+END_SRC
+
+* Labeling and Referencing
+** Labeling
+Labeling in plainex is quite hard. But as I already make some code for it, and here is the code.
+#+BEGIN_SRC tex
+  \newread\aux
+  \immediate\openin\aux=\jobname.aux
+  \ifeof\aux \message{! No file \jobname.aux;}
+  \else \input \jobname.aux \immediate\closein\aux \fi
+  \newwrite\aux
+  \immediate\openout\aux=\jobname.aux
+
+  \def\strip#1>{}
+  \def\label#1{\immediate\write\aux%
+  {\string\expandafter\string\def\string\csname\space#1\string\endcsname%
+  {{\expandafter\strip\meaning\lblitem}}}}
+
+  \def\ref#1{\ifundefined{#1}{\bf [??]}\else\csname #1\endcsname\fi}
+#+END_SRC
+
+** Referencing
+# TODO
+
+** End Implementation
+End of the implementation
+#+BEGIN_SRC tex
+\catcode`@=12 % END OF coprime.tex
+#+END_SRC
