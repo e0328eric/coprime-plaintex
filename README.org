@@ -487,6 +487,8 @@ This package gives four theorems: `Theorem`, `Proposition`, `Corollary` and `Lem
   \maketheorem{prop}{Proposition}
   \maketheorem{coro}{Corollary}
   \maketheorem{lemma}{Lemma}
+  \maketheorem{remark}{Remark}
+  \maketheorem{example}{Example}
 
   \maketheoremN{defin}{Definition}
   \maketheoremN{thm}{Theorem}
