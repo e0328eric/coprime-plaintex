@@ -464,11 +464,11 @@ To use theorems, =coprime= package provides four basic functions
 
   \def\thmbox#1{\advance\thmboxcnt by 1
   \rawthmbox{\bf#1 \the\sectioncnt.\the\subsectioncnt.\the\thmboxcnt.}
-  {\bf#1 \the\sectioncnt.\the\subsectioncnt.\the\thmboxcnt.}}
+  {\bf#1 \the\sectioncnt.\the\subsectioncnt.\the\thmboxcnt}}
 
   \def\thmboxN#1#2{\advance\thmboxcnt by 1
   \rawthmbox{\bf#1 \the\sectioncnt.\the\subsectioncnt.\the\thmboxcnt\enspace (#2).}
-  {\bf#1 \the\sectioncnt.\the\subsectioncnt.\the\thmboxcnt\enspace (#2).}}
+  {\bf#1 \the\sectioncnt.\the\subsectioncnt.\the\thmboxcnt}}
 #+END_SRC
 
 Following commands generates the *template* for basic theorems
@@ -506,9 +506,9 @@ To use these, one must predefine =\thmnamefmt=, =\thmlblfmt=, =\thmnamefmtN=, an
 respectively.
 #+BEGIN_SRC tex
   \outer\def\changethmbox#1{\def\thmbox##1{\advance\thmboxcnt by 1
-  \rawthmbox{\bf##1 #1.}{\bf##1 #1.}}}
+  \rawthmbox{\bf##1 #1.}{\bf##1 #1}}}
   \outer\def\changethmboxN#1{\def\thmboxN##1##2{\advance\thmboxcnt by 1
-  \rawthmbox{\bf##1 #1\enspace (##2).}{\bf##1 #1\enspace (##2).}}}
+  \rawthmbox{\bf##1 #1\enspace (##2).}{\bf##1 #1}}}
 
   \outer\def\changethmboxEx{\def\thmbox##1{\advance\thmboxcnt by 1
   \rawthmbox{\thmnamefmt{##1}}{\thmlblfmt{##1}}}}

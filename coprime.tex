@@ -320,11 +320,11 @@ end
 
 \def\thmbox#1{\advance\thmboxcnt by 1
 \rawthmbox{\bf#1 \the\sectioncnt.\the\subsectioncnt.\the\thmboxcnt.}
-{\bf#1 \the\sectioncnt.\the\subsectioncnt.\the\thmboxcnt.}}
+{\bf#1 \the\sectioncnt.\the\subsectioncnt.\the\thmboxcnt}}
 
 \def\thmboxN#1#2{\advance\thmboxcnt by 1
 \rawthmbox{\bf#1 \the\sectioncnt.\the\subsectioncnt.\the\thmboxcnt\enspace (#2).}
-{\bf#1 \the\sectioncnt.\the\subsectioncnt.\the\thmboxcnt\enspace (#2).}}
+{\bf#1 \the\sectioncnt.\the\subsectioncnt.\the\thmboxcnt}}
 
 \outer\def\maketheorem#1#2{\expandafter\gdef\csname#1\endcsname{\thmbox{#2}\enspace}%
 \expandafter\gdef\csname end#1\endcsname{\endthmbox}}
@@ -345,9 +345,9 @@ end
 \maketheoremN{lemma}{Lemma}
 
 \outer\def\changethmbox#1{\def\thmbox##1{\advance\thmboxcnt by 1
-\rawthmbox{\bf##1 #1.}{\bf##1 #1.}}}
+\rawthmbox{\bf##1 #1.}{\bf##1 #1}}}
 \outer\def\changethmboxN#1{\def\thmboxN##1##2{\advance\thmboxcnt by 1
-\rawthmbox{\bf##1 #1\enspace (##2).}{\bf##1 #1\enspace (##2).}}}
+\rawthmbox{\bf##1 #1\enspace (##2).}{\bf##1 #1}}}
 
 \outer\def\changethmboxEx{\def\thmbox##1{\advance\thmboxcnt by 1
 \rawthmbox{\thmnamefmt{##1}}{\thmlblfmt{##1}}}}
