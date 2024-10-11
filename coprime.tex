@@ -5,7 +5,7 @@
 %%
 %%      This file is generated from emacs tangle with coprime.org. DO NOT EDIT THIS MANUALLY!
 %%
-%%      version 0.2.0
+%%      version 0.3.0
 %%
 
 \def\ifundefined#1{\expandafter\ifx\csname#1\endcsname\relax}
@@ -69,6 +69,9 @@ end
 \protected\def\pdfsave{\pdfextension save\relax}
 \protected\def\pdfrestore{\pdfextension restore\relax}
 
+\newcount\captioncnt \newcount\eqnocnt    \newcount\sectioncnt \newcount\subsectioncnt
+\newcount\thmboxcnt  \newif\ifsecti@nused
+
 \def\today{\ifcase\month\or
   January\or February\or March\or April\or May\or June\or
   July\or August\or September\or October\or November\or December\fi
@@ -88,29 +91,32 @@ end
     tex.print([[\string\kern 3em]])
 }}
 
-\newcount\captioncnt \newcount\eqnocnt \newcount\sectioncnt \newcount\subsectioncnt
-\newif\ifsecti@nused
-
-\def\section#1{
+\def\secti@n#1#2{
 	\vskip 1pc
 	\subsectioncnt=0
 	\advance\sectioncnt by 1
-	\noindent{\sectionfnt\the\sectioncnt.\space#1}\par
+	\noindent{\sectionfnt#1\space#2}\par
 	\vskip 1em
 	\secti@nusedtrue
 }
+\def\section#1{\secti@n{\the\sectioncnt.}{#1}}
 
-\def\subsection#1{
+\def\subsecti@n#1#2{
 	\ifsecti@nused\else
 	\vskip 1em
 	\fi
 	\secti@nusedfalse
-	\captioncnt=0
-	\eqnocnt=0
+	\captioncnt=0 \eqnocnt=0 \thmboxcnt=0
 	\advance\subsectioncnt by 1
-	\noindent{\subsectionfnt\the\sectioncnt.\the\subsectioncnt.\space#1}\par
+	\noindent{\subsectionfnt#1\space#2}\par
 	\vskip 1ex
 }
+\def\subsection#1{\subsecti@n{\the\sectioncnt.\the\subsectioncnt.}{#1}}
+
+\outer\def\changesection#1{%
+\def\section##1{\secti@n{#1}{##1}}}
+\outer\def\changesubsection#1{%
+\def\subsection##1{\subsecti@n{#1}{##1}}}
 
 \def\resizebox#1#2{\setbox0=\hbox{#2}%
 \setbox1=\hbox{\pdfsave\pdfsetmatrix{#1 0 0 #1}\rlap{#2}\pdfrestore}%
@@ -158,6 +164,23 @@ end
 \def\caption#1#2{\global\advance\captioncnt by 1
 \begingroup\edef\lblitem{{\bf Figure \the\sectioncnt.\the\subsectioncnt.\the\captioncnt}}\label{#1}%
 \centerline{{\bf Figure \the\sectioncnt.\the\subsectioncnt.\the\captioncnt:} #2}\endgroup}
+
+\def\Eqno{\global\advance\eqnocnt by 1 \eqno{(\the\sectioncnt.\the\subsectioncnt.\the\eqnocnt)}}
+\def\Eqnolbl#1{\global\advance\eqnocnt by 1
+\begingroup\edef\lblitem{(\the\sectioncnt.\the\subsectioncnt.\the\eqnocnt)}\label{#1}\endgroup\eqno{(\the\sectioncnt.\the\subsectioncnt.\the\eqnocnt)}}
+
+\outer\def\changecaption#1{\def\caption##1##2{\global\advance\captioncnt by 1%
+\begingroup \edef\lblitem{\bf Figure #1}\label{##1}\centerline{{\bf Figure #1:}
+##2}\endgroup}}
+
+\outer\def\changeEqlbl#1{\def\Eqnolbl##1{\global\advance\eqnocnt by 1%
+\begingroup\edef\lblitem{#1}\label{##1}\endgroup\eqno{\rm#1}}}
+
+\outer\def\changecaptionEx#1#2{\def\caption##1##2{\global\advance\captioncnt by 1%
+\begingroup \edef\lblitem{\bf Figure #1}\label{##1}\centerline{{#2} ##2}\endgroup}}
+
+\outer\def\changeEqlblEx#1#2{\def\Eqnolbl##1{\global\advance\eqnocnt by 1%
+\begingroup\edef\lblitem{#1}\label{##1}\endgroup\eqno{#2}}}
 
 \def\bbb{\fam\bbfam}
 
@@ -275,140 +298,61 @@ end
 	\fi
 }
 
-\def\Eqno{\global\advance\eqnocnt by 1 \eqno{(\the\sectioncnt.\the\subsectioncnt.\the\eqnocnt)}}
-\def\Eqnolbl#1{\global\advance\eqnocnt by 1
-\begingroup\edef\lblitem{(\the\sectioncnt.\the\subsectioncnt.\the\eqnocnt)}\label{#1}\endgroup\eqno{(\the\sectioncnt.\the\subsectioncnt.\the\eqnocnt)}}
-
-\directlua{
-function __MakeTheorem__(name)
-	local string = require("string")
-	local count = [[\string\newcount\string\]] .. name .. "cnt"
-	local start_def = [[\string\def\string\]] .. string.lower(name) .. [[{
-	\string\par\string\penalty-50\string\advance\string\]] .. name .. [[cnt by 1
-	\string\begingroup
-	\string\postdisplaypenalty=10000
-	\string\vskip 1.5ex
-	\string\hrule\space height 0.7pt\string\nobreak
-	\string\vskip 1.5ex
-	\string\noindent{\string\bf\space]] .. name ..
-	[[\space\string\the\string\sectioncnt.\string\the\string\]] .. name .. [[cnt}\string\kern 1em
-	\string\def\string\proof{%
-		\string\par\string\hbox\space to\string\hsize{\string\xleaders\string\hbox\space
-		to.8em{\string\hss-\string\hss}\string\hfill}
-		\string\noindent{\string\it\space proof.}
-	}
-	\string\edef\string\lblitem{{\string\bf\space]] .. name ..
-	[[\space\string\the\string\sectioncnt.\string\the\string\]] .. name .. [[cnt}}\string\relax
-}]]
-
-	local end_def = [[\string\def\string\end]] .. string.lower(name) .. [[{%
-	\string\par\string\penalty10000
-	\string\vskip1.5ex
-	\string\hrule\space height 0.7pt
-	\string\endgroup\string\par
-	\string\vskip 1.5ex
-}]]
-	tex.print(count)
-	tex.print(start_def)
-	tex.print(end_def)
-end
-
-function __MakeTheoremWithName__(name)
-	local string = require("string")
-	local count = [[\string\newcount\string\]] .. name .. "cnt"
-	local start_def = [[\string\def\string\name]] .. string.lower(name) .. [[\string#1{
-	\string\par\string\penalty-50\string\advance\string\]] .. name .. [[cnt by 1
-	\string\begingroup
-	\string\postdisplaypenalty=10000
-	\string\vskip 1.5ex
-	\string\hrule\space height 0.7pt\string\nobreak
-	\string\vskip 1.5ex
-	\string\noindent{\string\bf\space]] .. name ..
-	[[\space\string\the\string\sectioncnt.\string\the\string\]] .. name ..
-	[[cnt}\space(\string#1)\string\kern 1em
-	\string\def\string\proof{%
-		\string\par\string\hbox\space to\string\hsize{\string\xleaders\string\hbox\space
-		to.8em{\string\hss-\string\hss}\string\hfill}
-		\string\noindent{\string\it\space proof.}
-	}
-	\string\edef\string\lblitem{{\string\bf\space]] .. name ..
-	[[\space\string\the\string\sectioncnt.\string\the\string\]] .. name .. [[cnt}}\string\relax
-}]]
-
-	local end_def = [[\string\def\string\end]] .. string.lower(name) .. [[{%
-	\string\par\string\penalty10000
-	\string\vskip1.5ex
-	\string\hrule\space height 0.7pt
-	\string\endgroup\string\par
-	\string\vskip 1.5ex
-}]]
-	tex.print(count)
-	tex.print(start_def)
-	tex.print(end_def)
-end
-}
-
-\def\thmbox#1{%
-	\par\penalty-50 \begingroup \postdisplaypenalty=10000 \vskip 1.5ex
-	\hrule height0.7pt\nobreak \vskip 1.5ex
-	\noindent{\bf#1.}\kern-5pt
-	\def\proof{%
-		\par\hbox to\hsize{\xleaders\hbox to.8em{\hss-\hss}\hfill}
+\def\rawthmbox#1#2{%
+    \par\penalty-50 \begingroup \postdisplaypenalty=10000 \vskip 1.5ex
+    \hrule height0.7pt\nobreak \vskip 1.5ex
+    \noindent{#1}%
+    \def\proof{%
+	    \par\hbox to\hsize{\xleaders\hbox to.8em{\hss-\hss}\hfill}
 		\noindent{\it proof.}
 	}
-	\edef\lblitem{{\bf#1}}\relax
-}
-
-\def\thmboxN#1#2{%
-	\par\penalty-50 \begingroup \postdisplaypenalty=10000 \vskip 1.5ex
-	\hrule height0.7pt\nobreak \vskip 1.5ex
-	\noindent{\bf#1 (#2).}\kern-5pt
-	\def\proof{%
-		\par\hbox to\hsize{\xleaders\hbox to.8em{\hss-\hss}\hfill}
-		\noindent{\it proof.}
-	}
-	\edef\lblitem{{\bf#1}}\relax
+	\edef\lblitem{#2}\relax
 }
 \def\endthmbox{\par\penalty10000 \vskip 1.5ex \hrule height0.7pt \endgroup\par \vskip 1.5ex }
 
 \def\pf{%
-	\par\hbox to\hsize{\xleaders\hbox to.8em{\hss-\hss}\hfill}
-	\noindent{\it proof.}
+    \par\hbox to\hsize{\xleaders\hbox to.8em{\hss-\hss}\hfill}
+    \noindent{\it proof.}
 }
 \def\endpf{%
-	\par\penalty10000\hbox to\hsize{\xleaders\hbox to.8em{\hss-\hss}\hfill}\vskip 1.5ex
+    \par\penalty10000\hbox to\hsize{\xleaders\hbox to.8em{\hss-\hss}\hfill}\vskip 1.5ex
 }
 
-\def\maketheorem#1{\directlua{__MakeTheorem__("#1")}}
-\def\maketheoremwithname#1{\directlua{__MakeTheoremWithName__("#1")}}
+\def\thmbox#1{\advance\thmboxcnt by 1
+\rawthmbox{\bf#1 \the\sectioncnt.\the\subsectioncnt.\the\thmboxcnt.}
+{\bf#1 \the\sectioncnt.\the\subsectioncnt.\the\thmboxcnt.}}
 
-\maketheorem{Definition}
-\maketheorem{Theorem}
-\maketheorem{Proposition}
-\maketheorem{Corollary}
-\maketheorem{Lemma}
+\def\thmboxN#1#2{\advance\thmboxcnt by 1
+\rawthmbox{\bf#1 \the\sectioncnt.\the\subsectioncnt.\the\thmboxcnt\enspace (#2).}
+{\bf#1 \the\sectioncnt.\the\subsectioncnt.\the\thmboxcnt\enspace (#2).}}
 
-\maketheoremwithname{Definition}
-\maketheoremwithname{Theorem}
-\maketheoremwithname{Proposition}
-\maketheoremwithname{Corollary}
-\maketheoremwithname{Lemma}
+\outer\def\maketheorem#1#2{\expandafter\gdef\csname#1\endcsname{\thmbox{#2}\enspace}%
+\expandafter\gdef\csname end#1\endcsname{\endthmbox}}
 
-\let\defin=\Definition
-\let\enddefin=\endDefinition
-\let\thm=\Theorem
-\let\endthm=\endTheorem
-\let\prop=\Proposition
-\let\endprop=\endProposition
-\let\coro=\Corollary
-\let\endcoro=\endCorollary
-\let\lemma=\Lemma
-\let\endlemma=\endLemma
+\outer\def\maketheoremN#1#2{\expandafter\gdef\csname#1N\endcsname##1{\thmboxN{#2}{##1}}%
+\expandafter\gdef\csname end#1N\endcsname{\endthmbox}}
 
-\let\namedefin=\namedefinition
-\let\namethm=\nametheorem
-\let\nameprop=\nameproposition
-\let\namecoro=\namecorollary
+\maketheorem{defin}{Definition}
+\maketheorem{thm}{Theorem}
+\maketheorem{prop}{Proposition}
+\maketheorem{coro}{Corollary}
+\maketheorem{lemma}{Lemma}
+
+\maketheoremN{defin}{Definition}
+\maketheoremN{thm}{Theorem}
+\maketheoremN{prop}{Proposition}
+\maketheoremN{coro}{Corollary}
+\maketheoremN{lemma}{Lemma}
+
+\outer\def\changethmbox#1{\def\thmbox##1{\advance\thmboxcnt by 1
+\rawthmbox{\bf##1 #1.}{\bf##1 #1.}}}
+\outer\def\changethmboxN#1{\def\thmboxN##1##2{\advance\thmboxcnt by 1
+\rawthmbox{\bf##1 #1\enspace (##2).}{\bf##1 #1\enspace (##2).}}}
+
+\outer\def\changethmboxEx{\def\thmbox##1{\advance\thmboxcnt by 1
+\rawthmbox{\thmnamefmt{##1}}{\thmlblfmt{##1}}}}
+\outer\def\changethmboxExN#1#2{\def\thmboxN##1##2{\advance\thmboxcnt by 1
+\rawthmbox{\thmnamefmtN{##1}{##2}}{\thmlblfmtN{##1}{##2}}}}
 
 \newread\aux
 \immediate\openin\aux=\jobname.aux
