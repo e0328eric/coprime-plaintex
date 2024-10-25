@@ -169,17 +169,17 @@ end
 \def\Eqnolbl#1{\global\advance\eqnocnt by 1
 \begingroup\edef\lblitem{(\the\sectioncnt.\the\subsectioncnt.\the\eqnocnt)}\label{#1}\endgroup\eqno{(\the\sectioncnt.\the\subsectioncnt.\the\eqnocnt)}}
 
-\outer\def\changecaption#1{\def\caption##1##2{\global\advance\captioncnt by 1%
+\outer\def\changecaption#1{\def\caption##1##2{\global\advance\captioncnt by 1
 \begingroup \edef\lblitem{\bf Figure #1}\label{##1}\centerline{{\bf Figure #1:}
 ##2}\endgroup}}
 
-\outer\def\changeEqlbl#1{\def\Eqnolbl##1{\global\advance\eqnocnt by 1%
+\outer\def\changeEqlbl#1{\def\Eqnolbl##1{\global\advance\eqnocnt by 1
 \begingroup\edef\lblitem{#1}\label{##1}\endgroup\eqno{\rm#1}}}
 
-\outer\def\changecaptionEx#1#2{\def\caption##1##2{\global\advance\captioncnt by 1%
+\outer\def\changecaptionEx#1#2{\def\caption##1##2{\global\advance\captioncnt by 1
 \begingroup \edef\lblitem{\bf Figure #1}\label{##1}\centerline{{#2} ##2}\endgroup}}
 
-\outer\def\changeEqlblEx#1#2{\def\Eqnolbl##1{\global\advance\eqnocnt by 1%
+\outer\def\changeEqlblEx#1#2{\def\Eqnolbl##1{\global\advance\eqnocnt by 1
 \begingroup\edef\lblitem{#1}\label{##1}\endgroup\eqno{#2}}}
 
 \def\bbb{\fam\bbfam}
@@ -299,30 +299,30 @@ end
 }
 
 \def\rawthmbox#1#2{%
-    \par\penalty-50 \begingroup \postdisplaypenalty=10000 \vskip 1.5ex
-    \hrule height0.7pt\nobreak \vskip 1.5ex
-    \noindent{#1}%
-    \def\proof{%
-	    \par\hbox to\hsize{\xleaders\hbox to.8em{\hss-\hss}\hfill}
+	\par\penalty-50 \begingroup \postdisplaypenalty=10000 \vskip 1.5ex
+	\hrule height0.7pt\nobreak \vskip 1.5ex
+	\noindent{#1}%
+	\def\proof{%
+		\par\hbox to\hsize{\xleaders\hbox to.8em{\hss-\hss}\hfill}
 		\noindent{\it proof.}
-	}
-	\edef\lblitem{#2}\relax
+	}%
+	\edef\lblitem{#2}\relax%
 }
 \def\endthmbox{\par\penalty10000 \vskip 1.5ex \hrule height0.7pt \endgroup\par \vskip 1.5ex }
 
 \def\pf{%
-    \par\hbox to\hsize{\xleaders\hbox to.8em{\hss-\hss}\hfill}
-    \noindent{\it proof.}
+	\par\hbox to\hsize{\xleaders\hbox to.8em{\hss-\hss}\hfill}
+	\noindent{\it proof.}
 }
 \def\endpf{%
-    \par\penalty10000\hbox to\hsize{\xleaders\hbox to.8em{\hss-\hss}\hfill}\vskip 1.5ex
+	\par\penalty10000\hbox to\hsize{\xleaders\hbox to.8em{\hss-\hss}\hfill}\vskip 1.5ex
 }
 
-\def\thmbox#1{\advance\thmboxcnt by 1
+\def\thmbox#1{\advance\thmboxcnt by 1%
 \rawthmbox{\bf#1 \the\sectioncnt.\the\subsectioncnt.\the\thmboxcnt.}
 {\bf#1 \the\sectioncnt.\the\subsectioncnt.\the\thmboxcnt}}
 
-\def\thmboxN#1#2{\advance\thmboxcnt by 1
+\def\thmboxN#1#2{\advance\thmboxcnt by 1%
 \rawthmbox{\bf#1 \the\sectioncnt.\the\subsectioncnt.\the\thmboxcnt\enspace (#2).}
 {\bf#1 \the\sectioncnt.\the\subsectioncnt.\the\thmboxcnt}}
 
@@ -366,7 +366,7 @@ end
 \def\strip#1>{}
 \def\label#1{\immediate\write\aux%
 {\string\expandafter\string\def\string\csname\space#1\string\endcsname%
-{{\expandafter\strip\meaning\lblitem}}}}
+{{\expandafter\strip\meaning\lblitem}}}\relax\ignorespaces}
 
 \def\ref#1{\ifundefined{#1}{\bf [??]}\else\csname #1\endcsname\fi}
 
