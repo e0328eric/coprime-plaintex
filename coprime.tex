@@ -301,7 +301,7 @@ end
 \def\rawthmbox#1#2{%
 	\par\penalty-50 \begingroup \postdisplaypenalty=10000 \vskip 1.5ex
 	\hrule height0.7pt\nobreak \vskip 1.5ex
-	\noindent{#1}%
+	\noindent{#1\kern1em}%
 	\def\proof{%
 		\par\hbox to\hsize{\xleaders\hbox to.8em{\hss-\hss}\hfill}
 		\noindent{\it proof.}
@@ -326,7 +326,7 @@ end
 \rawthmbox{\bf#1 \the\sectioncnt.\the\subsectioncnt.\the\thmboxcnt\enspace (#2).}
 {\bf#1 \the\sectioncnt.\the\subsectioncnt.\the\thmboxcnt}}
 
-\outer\def\maketheorem#1#2{\expandafter\gdef\csname#1\endcsname{\thmbox{#2}\enspace}%
+\outer\def\maketheorem#1#2{\expandafter\gdef\csname#1\endcsname{\thmbox{#2}}%
 \expandafter\gdef\csname end#1\endcsname{\endthmbox}}
 
 \outer\def\maketheoremN#1#2{\expandafter\gdef\csname#1N\endcsname##1{\thmboxN{#2}{##1}}%
